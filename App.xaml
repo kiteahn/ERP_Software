@@ -1,0 +1,25 @@
+<Application x:Class="PhanMemInAnERP.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:PhanMemInAnERP"
+             xmlns:helpers="clr-namespace:PhanMemInAnERP.Helpers"
+>
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <materialDesign:BundledTheme BaseTheme="Light"
+                                         PrimaryColor="DeepPurple"
+                                         SecondaryColor="Lime" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Converters -->
+            <helpers:BoolToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <helpers:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
+            <helpers:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+            <helpers:GreaterThanZeroConverter x:Key="GreaterThanZeroConverter"/>
+            <helpers:DecimalToStringConverter x:Key="DecimalToStringConverter"/>
+            <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
