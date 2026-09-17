@@ -1,0 +1,37 @@
+<Window x:Class="PhanMemInAnERP.Views.LoginRedirectWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="" Width="420" MinHeight="140" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None" ResizeMode="NoResize"
+        Background="Transparent" AllowsTransparency="True"
+        ShowInTaskbar="False" Topmost="True">
+
+    <Border CornerRadius="10" BorderBrush="#C8C8C8" BorderThickness="1" Background="White"
+            SnapsToDevicePixels="True">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.35" Direction="270"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="36"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Vùng thanh tiêu đề kiểu hộp thoại (be nhạt), không nút điều khiển -->
+            <Border Grid.Row="0" Background="#EDE8DC" CornerRadius="10,10,0,0"/>
+
+            <TextBlock x:Name="MessageTextBlock" Grid.Row="1"
+                       FontSize="14" Foreground="#1a1a1a"
+                       TextWrapping="Wrap" VerticalAlignment="Center"
+                       Margin="22,16,22,16" LineHeight="20"/>
+
+            <!-- Chân xám + thanh tiến trình (không nút OK — tự đóng) -->
+            <Border Grid.Row="2" Background="#ECECEC" CornerRadius="0,0,10,10"
+                    BorderBrush="#D0D0D0" BorderThickness="0,1,0,0" Padding="14,10,14,12">
+                <ProgressBar Height="5" IsIndeterminate="True" Foreground="#2c3e50"/>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

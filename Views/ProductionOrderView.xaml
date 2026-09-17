@@ -1,0 +1,250 @@
+<Window x:Class="PhanMemInAnERP.Views.ProductionOrderView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:PhanMemInAnERP.ViewModels"
+        Title="Quản Lý Lệnh Sản Xuất" Height="850" Width="1200" WindowStartupLocation="CenterScreen">
+
+    <Window.DataContext>
+        <vm:ProductionOrderViewModel/>
+    </Window.DataContext>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="150"/>
+        </Grid.RowDefinitions>
+
+        <!-- 1. Form nhập liệu -->
+        <GroupBox Grid.Row="0" Header="THÔNG TIN LỆNH SẢN XUẤT" FontWeight="Bold" Foreground="#667eea" Margin="0,0,0,20">
+            <StackPanel Margin="10" TextElement.FontWeight="Normal" TextElement.Foreground="Black">
+                
+                <!-- Chọn Báo giá để nhập nhanh -->
+                <Border Background="#f8f9fa" Padding="15,10" CornerRadius="5" Margin="0,0,0,15" BorderBrush="#28a745" BorderThickness="1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="📂 Nhập từ Báo giá:" VerticalAlignment="Center" FontWeight="Bold" Foreground="#28a745"/>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding SavedQuotations}" SelectedItem="{Binding SelectedQuotation}" Padding="5">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                        <Run Text="{Binding CustomerName}" FontWeight="Bold"/> 
+                                        <Run Text=" - "/> 
+                                        <Run Text="{Binding ProductName}"/> 
+                                        <Run Text=" ("/>
+                                        <Run Text="{Binding QuoteDate, StringFormat={}{0:dd/MM/yyyy HH:mm}}"/>
+                                        <Run Text=")"/>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Số Lệnh (*):" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1" Text="{Binding CurrentOrder.OrderNo}" Margin="0,0,20,0" Padding="5"/>
+
+                    <TextBlock Grid.Column="2" Text="Ngày lập:" VerticalAlignment="Center"/>
+                    <DatePicker Grid.Column="3" SelectedDate="{Binding CurrentOrder.OrderDate}" Margin="0,0,20,0"/>
+
+                    <TextBlock Grid.Column="4" Text="Hạn hoàn thiện:" VerticalAlignment="Center"/>
+                    <DatePicker Grid.Column="5" SelectedDate="{Binding CurrentOrder.Deadline}"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Khách hàng (*):" VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="1" Margin="0,0,20,0" Padding="5" MinHeight="28"
+                              ItemsSource="{Binding OrderFormCustomers}"
+                              SelectedItem="{Binding SelectedProductionCustomer, Mode=TwoWay}"
+                              DisplayMemberPath="Name"
+                              Text="{Binding CurrentOrder.CustomerName, UpdateSourceTrigger=PropertyChanged}"
+                              IsEditable="True" IsTextSearchEnabled="True" IsTextSearchCaseSensitive="False"
+                              StaysOpenOnEdit="True"
+                              VerticalContentAlignment="Center"
+                              ToolTip="Gõ để tìm theo tên — chọn dòng để điền tên + ĐT/MST/địa chỉ vào ghi chú"/>
+
+                    <TextBlock Grid.Column="2" Text="Sản phẩm (*):" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="3" Text="{Binding CurrentOrder.ProductName}" Margin="0,0,20,0" Padding="5"/>
+
+                    <TextBlock Grid.Column="4" Text="Số lượng:" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="5" Text="{Binding CurrentOrder.Quantity}" Padding="5"/>
+                </Grid>
+
+                <Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Kích thước:" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1" Text="{Binding CurrentOrder.Dimensions}" Margin="0,0,20,0" Padding="5"/>
+
+                    <TextBlock Grid.Column="2" Text="Chất liệu (*):" VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="3" ItemsSource="{Binding AvailableMaterials}" 
+                              DisplayMemberPath="Name" SelectedValuePath="Name" 
+                              SelectedValue="{Binding CurrentOrder.Material}" Margin="0,0,20,0" Padding="5"/>
+
+                    <TextBlock Grid.Column="4" Text="Trạng thái:" VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="5" SelectedValue="{Binding CurrentOrder.Status}" SelectedValuePath="Content" Padding="5">
+                        <ComboBoxItem Content="Chờ SX"/>
+                        <ComboBoxItem Content="Đang SX"/>
+                        <ComboBoxItem Content="Hoàn thành"/>
+                    </ComboBox>
+                </Grid>
+
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Ghi chú kỹ thuật:" VerticalAlignment="Top" Margin="0,5,0,0"/>
+                    <TextBox Grid.Column="1" Text="{Binding CurrentOrder.Notes}" 
+                             AcceptsReturn="True" TextWrapping="Wrap" 
+                             VerticalScrollBarVisibility="Auto" MinHeight="80" MaxHeight="120" Padding="5"/>
+                </Grid>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="🔄 Hủy / Tạo Mới" Command="{Binding ClearFormCommand}" Width="130" Margin="0,0,10,0" Padding="8" Background="#6c757d" Foreground="White" Cursor="Hand"/>
+                    <Button Content="💾 LƯU LỆNH SX" Command="{Binding SaveCommand}" Width="150" Padding="8" Background="#28a745" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- 2. Danh sách lệnh -->
+        <Border Grid.Row="1" Background="White" CornerRadius="10" Padding="15" Margin="0,0,0,10" BorderBrush="#e0e0e0" BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                    <TextBlock Text="🔍 Tìm kiếm lệnh:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold"/>
+                    <TextBox Width="350" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Padding="5" />
+                </StackPanel>
+
+                <DataGrid Grid.Row="1" ItemsSource="{Binding FilteredOrders}" AutoGenerateColumns="False" 
+                          CanUserAddRows="False" IsReadOnly="True" RowHeight="40" Background="White">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Số Lệnh" Binding="{Binding OrderNo}" Width="130"/>
+                        <DataGridTextColumn Header="Khách Hàng" Binding="{Binding CustomerName}" Width="*"/>
+                        <DataGridTextColumn Header="Sản phẩm" Binding="{Binding ProductName}" Width="*"/>
+                        <DataGridTextColumn Header="Số Lượng" Binding="{Binding Quantity, StringFormat={}{0:N0}}" Width="100"/>
+                        <DataGridTextColumn Header="Trạng Thái" Binding="{Binding Status}" Width="120">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Status}" Value="Đang SX">
+                                            <Setter Property="Foreground" Value="#ffc107"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Status}" Value="Hoàn thành">
+                                            <Setter Property="Foreground" Value="#28a745"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTemplateColumn Header="Thao Tác" Width="320">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Command="{Binding DataContext.StartProductionCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}" Padding="8,2" Margin="0,0,5,0">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                                    <Setter Property="Content" Value="▶ Chạy"/>
+                                                    <Setter Property="Background" Value="#28a745"/>
+                                                    <Setter Property="Foreground" Value="White"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Đang SX">
+                                                            <Setter Property="IsEnabled" Value="False"/>
+                                                            <Setter Property="Content" Value="⏳ Chạy..."/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Hoàn thành">
+                                                            <Setter Property="IsEnabled" Value="False"/>
+                                                            <Setter Property="Content" Value="✅ Xong"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                        <Button Command="{Binding DataContext.CompleteProductionCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}" Padding="8,2" Margin="0,0,5,0">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                                    <Setter Property="Content" Value="🏭 HTXS"/>
+                                                    <Setter Property="Background" Value="#17a2b8"/>
+                                                    <Setter Property="Foreground" Value="White"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Chờ SX">
+                                                            <Setter Property="IsEnabled" Value="False"/>
+                                                            <Setter Property="Content" Value="⏸ Chưa chạy"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Đang SX">
+                                                            <Setter Property="IsEnabled" Value="True"/>
+                                                            <Setter Property="Content" Value="🏭 HTXS"/>
+                                                            <Setter Property="Background" Value="#ffc107"/>
+                                                            <Setter Property="Foreground" Value="Black"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Hoàn thành">
+                                                            <Setter Property="IsEnabled" Value="False"/>
+                                                            <Setter Property="Content" Value="✅ Đã HT"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                        <Button Content="📝 Sửa" Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}" Background="#17a2b8" Foreground="White" Width="60" Margin="0,0,5,0"/>
+                                        <Button Content="🗑️" Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}" Background="#dc3545" Foreground="White" Width="35"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <!-- 3. Nhật ký hoạt động -->
+        <GroupBox Grid.Row="2" Header="NHẬT KÝ HỆ THỐNG" Background="#1e1e1e" Foreground="White" FontFamily="Consolas">
+            <ListBox ItemsSource="{Binding OperationLogs}" Background="Transparent" BorderThickness="0" Foreground="#00ff00" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" FontSize="12" Margin="2"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </GroupBox>
+    </Grid>
+</Window>

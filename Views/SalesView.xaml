@@ -1,0 +1,697 @@
+<Window x:Class="PhanMemInAnERP.Views.SalesView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:PhanMemInAnERP.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:SalesViewModel, IsDesignTimeCreatable=False}"
+        Title="Bán Hàng &amp; Công Nợ" Height="850" Width="1320" MinWidth="1100" WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
+
+    <Grid Margin="15">
+        <TabControl Background="White" BorderBrush="#e0e0e0" Padding="5">
+
+            <TabItem Header="📋 Đơn Hàng" FontSize="15" FontWeight="Bold">
+                <Grid Margin="15">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <GroupBox Grid.Row="0" Header="TẠO ĐƠN HÀNG MỚI" Foreground="#667eea" Margin="0,0,0,10">
+                        <Grid Margin="10" TextElement.Foreground="Black">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="135"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="125"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="42"/>
+                                <RowDefinition Height="42"/>
+                                <RowDefinition Height="42"/>
+                                <RowDefinition Height="42"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="42"/>
+                                <RowDefinition Height="42"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Hàng 1: Số đơn + Ngày đặt + Khách hàng -->
+                            <TextBlock Text="Số đơn (*):" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBox Grid.Column="1" Text="{Binding CurrentOrder.OrderNo, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,15,4" Padding="5" BorderThickness="1"/>
+
+                            <TextBlock Grid.Column="2" Text="Ngày đặt:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <DatePicker Grid.Column="3" SelectedDate="{Binding CurrentOrder.OrderDate}" Margin="0,4,15,4" VerticalAlignment="Center"/>
+
+                            <TextBlock Grid.Column="4" Text="Khách hàng:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <ComboBox Grid.Column="5" ItemsSource="{Binding OrderFormCustomers}" SelectedItem="{Binding SelectedOrderCustomer, Mode=TwoWay}"
+                                      DisplayMemberPath="Name" Text="{Binding CurrentOrder.CustomerName, UpdateSourceTrigger=PropertyChanged}"
+                                      IsEditable="True" Padding="5" VerticalAlignment="Center" VerticalContentAlignment="Center"
+                                      MinHeight="28" ToolTip="Chọn khách trong danh bạ hoặc gõ tên mới"/>
+
+                            <!-- Hàng 2: Sản phẩm + Kích thước + Mã số thuế -->
+                            <TextBlock Grid.Row="1" Text="Sản phẩm:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding CurrentOrder.ProductName}" Margin="0,4,15,4" Padding="5"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="2" Text="Kích thước:" VerticalAlignment="Center" Foreground="#667eea" FontWeight="Bold" Margin="0,0,8,0"/>
+                            <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding CurrentOrder.Dimensions, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,15,4" Padding="5" ToolTip="Ví dụ: 20x30cm"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="4" Text="Mã số thuế:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBox Grid.Row="1" Grid.Column="5" Text="{Binding CurrentOrder.TaxCode, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,0,4" Padding="5"/>
+
+                            <!-- Hàng 3: Số lượng + Đơn giá + Thanh toán -->
+                            <TextBlock Grid.Row="2" Text="Số lượng (*):" VerticalAlignment="Center" Foreground="Blue" Margin="0,0,8,0"/>
+                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding OrdQty, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,15,4" Padding="5"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="2" Text="Đơn giá (*):" VerticalAlignment="Center" Foreground="Blue" Margin="0,0,8,0"/>
+                            <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding OrdPrice, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,15,4" Padding="5"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="4" Text="Thanh toán:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <ComboBox Grid.Row="2" Grid.Column="5" Text="{Binding CurrentOrder.PaymentTerm}" Padding="5" VerticalAlignment="Center" Margin="0,4,0,4">
+                                <ComboBoxItem Content="Tiền mặt"/>
+                                <ComboBoxItem Content="Chuyển khoản"/>
+                                <ComboBoxItem Content="Công nợ"/>
+                            </ComboBox>
+
+                            <!-- Hàng 4: Ngày giao + Giờ giao + Địa chỉ -->
+                            <TextBlock Grid.Row="3" Text="Ngày giao hàng:" VerticalAlignment="Center" Foreground="#155724" FontWeight="SemiBold" Margin="0,0,8,0"/>
+                            <DatePicker Grid.Row="3" Grid.Column="1" SelectedDate="{Binding CurrentOrder.Deadline}" Margin="0,4,15,4" VerticalAlignment="Center"
+                                        ToolTip="Hạn giao hàng dự kiến cho khách"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="2" Text="Giờ giao:" VerticalAlignment="Center" Foreground="#155724" FontWeight="SemiBold" Margin="0,0,8,0"/>
+                            <StackPanel Grid.Row="3" Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,4,15,4">
+                                <ComboBox Width="55" ItemsSource="{Binding AvailableHours}" SelectedItem="{Binding SelectedHour}" Padding="3"/>
+                                <TextBlock Text=":" VerticalAlignment="Center" Margin="4,0" FontWeight="Bold"/>
+                                <ComboBox Width="55" ItemsSource="{Binding AvailableMinutes}" SelectedItem="{Binding SelectedMinute}" Padding="3"/>
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="3" Grid.Column="4" Text="Địa chỉ giao:" VerticalAlignment="Center" Foreground="#e67e22" FontWeight="Bold" Margin="0,0,8,0"/>
+                            <TextBox Grid.Row="3" Grid.Column="5" Text="{Binding CurrentOrder.Address}" Padding="5" Margin="0,4,0,4"/>
+
+                            <!-- Hàng 5: Loại bán hàng + Số ngày được nợ -->
+                            <TextBlock Grid.Row="4" Text="Loại bán hàng:" VerticalAlignment="Center" Foreground="#6b21a8" FontWeight="Bold" Margin="0,8,8,0"/>
+                            <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Margin="0,8,0,0" VerticalAlignment="Center">
+                                <RadioButton Content="Nội địa" IsChecked="{Binding CurrentOrder.SaleType, Converter={StaticResource BoolToVis}, Mode=OneWay}"
+                                             GroupName="SaleType" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                <RadioButton Content="Xuất khẩu" GroupName="SaleType" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                <RadioButton Content="Dịch vụ" GroupName="SaleType" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="4" Grid.Column="2" Text="Số ngày nợ:" VerticalAlignment="Center" Foreground="#1565c0" Margin="0,8,8,0"/>
+                            <TextBox Grid.Row="4" Grid.Column="3" Text="{Binding CurrentOrder.CreditDays, UpdateSourceTrigger=PropertyChanged}"
+                                     Padding="5" VerticalContentAlignment="Center" Margin="0,8,15,0" Width="80" HorizontalAlignment="Left"/>
+
+                            <TextBlock Grid.Row="4" Grid.Column="4" Text="Ghi chú:" VerticalAlignment="Center" Margin="0,8,8,0"/>
+                            <TextBox Grid.Row="4" Grid.Column="5" Text="{Binding CurrentOrder.PaymentTerm}" Padding="5" Margin="0,8,0,0"/>
+
+                            <!-- Hàng 5: Tài khoản hạch toán -->
+                            <TextBlock Grid.Row="5" Text="TK nợ:" VerticalAlignment="Center" Foreground="#2e7d32" FontWeight="SemiBold" Margin="0,12,8,0"/>
+                            <ComboBox Grid.Row="5" Grid.Column="1"
+                                      ItemsSource="{Binding DebitAccountOptions}"
+                                      SelectedItem="{Binding SelectedDebitAccount, Mode=TwoWay}"
+                                      Padding="5"
+                                      Margin="0,8,15,8"
+                                      VerticalAlignment="Center"
+                                      Width="280"
+                                      ToolTip="Chọn tài khoản nợ"/>
+
+                            <TextBlock Grid.Row="5" Grid.Column="2" Text="TK có:" VerticalAlignment="Center" Foreground="#e65100" FontWeight="SemiBold" Margin="0,12,8,0"/>
+                            <ComboBox Grid.Row="5" Grid.Column="3"
+                                      ItemsSource="{Binding CreditAccountOptions}"
+                                      SelectedItem="{Binding SelectedCreditAccount, Mode=TwoWay}"
+                                      Padding="5"
+                                      Margin="0,8,15,8"
+                                      VerticalAlignment="Center"
+                                      Width="280"
+                                      ToolTip="Chọn tài khoản có"/>
+
+                            <!-- Hàng 6: Ngày giao + Giờ giao + Địa chỉ -->
+                            <TextBlock Grid.Row="6" Text="Ngày giao hàng:" VerticalAlignment="Center" Foreground="#155724" FontWeight="SemiBold" Margin="0,0,8,0"/>
+                            <DatePicker Grid.Row="6" Grid.Column="1" SelectedDate="{Binding CurrentOrder.Deadline}" Margin="0,4,15,4" VerticalAlignment="Center"
+                                        ToolTip="Hạn giao hàng dự kiến cho khách"/>
+
+                            <TextBlock Grid.Row="6" Grid.Column="2" Text="Giờ giao:" VerticalAlignment="Center" Foreground="#155724" FontWeight="SemiBold" Margin="0,0,8,0"/>
+                            <StackPanel Grid.Row="6" Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,4,15,4">
+                                <ComboBox Width="55" ItemsSource="{Binding AvailableHours}" SelectedItem="{Binding SelectedHour}" Padding="3"/>
+                                <TextBlock Text=":" VerticalAlignment="Center" Margin="4,0" FontWeight="Bold"/>
+                                <ComboBox Width="55" ItemsSource="{Binding AvailableMinutes}" SelectedItem="{Binding SelectedMinute}" Padding="3"/>
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="6" Grid.Column="4" Text="Địa chỉ giao:" VerticalAlignment="Center" Foreground="#e67e22" FontWeight="Bold" Margin="0,0,8,0"/>
+                            <TextBox Grid.Row="6" Grid.Column="5" Text="{Binding CurrentOrder.Address}" Padding="5" Margin="0,4,0,4"/>
+                        </Grid>
+                    </GroupBox>
+
+                    <Border Grid.Row="1" Background="#f8f9fa" Padding="15,10" CornerRadius="5" Margin="0,5,0,30">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <TextBlock Text="THÀNH TIỀN: " VerticalAlignment="Center" FontWeight="Bold" FontSize="14"/>
+                            <TextBlock Text="{Binding OrdTotal, StringFormat={}{0:N0} VNĐ}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#155724" FontSize="20" Width="180"/>
+                            <Button Content="💾 XÁC NHẬN LƯU ĐƠN HÀNG" Command="{Binding SaveOrderCommand}" Background="#28a745" Foreground="White" Width="230" Height="40" FontSize="14" FontWeight="Bold" Margin="0,0,10,0">
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="5"/>
+                                    </Style>
+                                </Button.Resources>
+                            </Button>
+                            <Button Content="🖨️ XEM TRƯỚC &amp; IN" Command="{Binding PreviewOrderCommand}" Background="#17a2b8" Foreground="White" Width="170" Height="40" FontSize="14" FontWeight="Bold">
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="5"/>
+                                    </Style>
+                                </Button.Resources>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+
+                    <DataGrid Grid.Row="2" ItemsSource="{Binding OrdersList}" AutoGenerateColumns="False" IsReadOnly="True" RowHeight="35" AlternatingRowBackground="#fcfcfc" BorderBrush="#dee2e6">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Số Đơn" Binding="{Binding OrderNo}" Width="110"/>
+                            <DataGridTextColumn Header="Ngày Đặt" Binding="{Binding OrderDate, StringFormat=dd/MM/yyyy}" Width="95"/>
+                            <DataGridTextColumn Header="Khách Hàng" Binding="{Binding CustomerName}" Width="*"/>
+                            <DataGridTextColumn Header="Sản Phẩm" Binding="{Binding ProductName}" Width="*"/>
+                            <DataGridTextColumn Header="Kích thước" Binding="{Binding Dimensions}" Width="100"/>
+                            <DataGridTextColumn Header="MST" Binding="{Binding TaxCode}" Width="100"/>
+                            <DataGridTextColumn Header="Số Lượng" Binding="{Binding Quantity, StringFormat={}{0:N0}}" Width="80"/>
+                            <DataGridTextColumn Header="Đơn Giá" Binding="{Binding UnitPrice, StringFormat={}{0:N0}}" Width="100"/>
+                            <DataGridTextColumn Header="Tổng Tiền" Binding="{Binding TotalAmount, StringFormat={}{0:N0}}" FontWeight="Bold" Width="110"/>
+                            <DataGridTextColumn Header="Giờ giao" Binding="{Binding DeliveryTime, StringFormat='{}{0:hh\\:mm}'}" Width="80"/>
+                            <DataGridTemplateColumn Header="Xóa" Width="60">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="🗑️" Command="{Binding DataContext.DeleteOrderCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Background="#dc3545" Foreground="White" BorderThickness="0" Padding="2"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="🧾 Hóa Đơn" FontSize="15" FontWeight="Bold">
+                <Grid Margin="15">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <GroupBox Header="LẬP HÓA ĐƠN TÀI CHÍNH" Foreground="#dc3545" Margin="0,0,0,15">
+                        <Grid Margin="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="40"/>
+                                <RowDefinition Height="40"/>
+                                <RowDefinition Height="40"/>
+                                <RowDefinition Height="40"/>
+                                <RowDefinition Height="40"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Hàng 1: Số HĐ + Mẫu số + Ký hiệu -->
+                            <TextBlock Text="Số HĐ:" VerticalAlignment="Center"/>
+                            <TextBox Grid.Column="1" Text="{Binding CurrentInvoice.InvoiceNo}" Margin="0,0,15,0" Padding="5"/>
+
+                            <TextBlock Grid.Column="2" Text="Mẫu số:" VerticalAlignment="Center"/>
+                            <TextBox Grid.Column="3" Text="{Binding CurrentInvoice.TemplateNo}" Margin="0,0,15,0" Padding="5" ToolTip="Nhập mẫu số, ví dụ: 1/001"/>
+
+                            <TextBlock Grid.Column="4" Text="Ký hiệu:" VerticalAlignment="Center"/>
+                            <TextBox Grid.Column="5" Text="{Binding CurrentInvoice.Symbol}" Padding="5" ToolTip="Nhập ký hiệu, ví dụ: KT/26E"/>
+
+                            <!-- Hàng 2: Khách hàng + MST + Tham chiếu -->
+                            <TextBlock Grid.Row="1" Text="Khách hàng:" VerticalAlignment="Center"/>
+                            <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding OrderFormCustomers}" SelectedItem="{Binding SelectedCustomerForInvoice}" DisplayMemberPath="Name"
+                                      IsEditable="True" Text="{Binding InvoiceCustomerName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,15,0" Padding="5" VerticalContentAlignment="Center"
+                                      ToolTip="Hãy chọn khách hàng hoặc gõ tên vào đây để lọc danh sách đơn hàng tương ứng."/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="2" Text="Mã số thuế:" VerticalAlignment="Center"/>
+                            <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding CurrentInvoice.TaxCode, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,15,0" Padding="5"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="4" Text="Tham chiếu:" VerticalAlignment="Center" Foreground="#17a2b8" FontWeight="Bold"/>
+                            <ComboBox Grid.Row="1" Grid.Column="5" ItemsSource="{Binding FilteredOrdersForInvoice}" SelectedItem="{Binding SelectedOrderForInvoice}"
+                                      DisplayMemberPath="OrderNo" Padding="5" VerticalAlignment="Center"
+                                      ToolTip="Danh sách đơn hàng CHƯA có hóa đơn của khách hàng đã chọn."/>
+
+                            <!-- Hàng 3: Tài khoản kế toán (TK) -->
+                            <TextBlock Grid.Row="2" Text="Tài khoản Nợ (TK_No):" VerticalAlignment="Center" Foreground="#856404" FontWeight="Bold"/>
+                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding CurrentInvoice.TK_No}" Margin="0,0,15,0" Padding="5" ToolTip="Tài khoản nợ (ví dụ: 131)"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="2" Text="Tài khoản Có (TK_Co):" VerticalAlignment="Center" Foreground="#856404" FontWeight="Bold"/>
+                            <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding CurrentInvoice.TK_Co}" Margin="0,0,15,0" Padding="5" ToolTip="Tài khoản có (ví dụ: 511, 212)"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="4" Text="Loại TK:" VerticalAlignment="Center" Foreground="#155724" FontWeight="Bold"/>
+                            <ComboBox Grid.Row="2" Grid.Column="5" ItemsSource="{Binding AccountTypeOptions}"
+                                      SelectedItem="{Binding CurrentInvoice.AccountType}" Padding="5" VerticalAlignment="Center"
+                                      ToolTip="Chọn loại tài khoản: Công nợ, Tiền mặt, Ngân hàng"/>
+
+                            <!-- Hàng 4: Địa chỉ + SĐT + Ghi chú -->
+                            <TextBlock Grid.Row="3" Text="Địa chỉ:" VerticalAlignment="Center" Foreground="#e67e22" FontWeight="Bold"/>
+                            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding CurrentInvoice.Address, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,15,0" Padding="5"
+                                     ToolTip="Địa chỉ giao hàng"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="2" Text="SĐT:" VerticalAlignment="Center" Foreground="#e67e22" FontWeight="Bold"/>
+                            <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding CurrentInvoice.Phone, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,15,0" Padding="5"
+                                     ToolTip="Số điện thoại khách hàng"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="4" Text="Ghi chú:" VerticalAlignment="Center" Foreground="#17a2b8" FontWeight="Bold"/>
+                            <TextBox Grid.Row="3" Grid.Column="5" Text="{Binding CurrentInvoice.Notes, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,15,0" Padding="5"
+                                     ToolTip="Ghi chú hóa đơn"/>
+
+                            <!-- Hàng 5: Tiền hàng + VAT + Tổng + Lưu -->
+                            <TextBlock Grid.Row="4" Text="Tiền hàng:" VerticalAlignment="Center" Foreground="Blue"/>
+                            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding InvSubTotal, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,15,0" Padding="5"/>
+
+                            <TextBlock Grid.Row="4" Grid.Column="2" Text="VAT (%):" VerticalAlignment="Center" Foreground="Blue"/>
+                            <TextBox Grid.Row="4" Grid.Column="3" Text="{Binding InvVAT, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,15,0" Padding="5"/>
+
+                            <StackPanel Grid.Row="4" Grid.Column="4" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                <TextBlock Text="TỔNG TT: " VerticalAlignment="Center" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding InvTotal, StringFormat={}{0:N0} VNĐ}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#dc3545" Width="130"/>
+                                <Button Content="💾 LƯU HÓA ĐƠN" Command="{Binding SaveInvoiceCommand}" Background="#dc3545" Foreground="White" Width="120" FontWeight="Bold" Margin="10,0,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+
+                    <DataGrid Grid.Row="2" ItemsSource="{Binding InvoicesList}" AutoGenerateColumns="False" IsReadOnly="True" RowHeight="35" Margin="0,15,0,0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Số HĐ" Binding="{Binding InvoiceNo}" Width="100"/>
+                            <DataGridTextColumn Header="Ngày Lập" Binding="{Binding InvoiceDate, StringFormat=dd/MM/yyyy}" Width="95"/>
+                            <DataGridTextColumn Header="Mẫu số" Binding="{Binding TemplateNo}" Width="80"/>
+                            <DataGridTextColumn Header="Khách Hàng" Binding="{Binding CustomerName}" Width="*"/>
+                            <DataGridTextColumn Header="TK Nợ" Binding="{Binding TK_No}" Width="70"/>
+                            <DataGridTextColumn Header="TK Có" Binding="{Binding TK_Co}" Width="70"/>
+                            <DataGridTextColumn Header="Loại TK" Binding="{Binding AccountType}" Width="110"/>
+                            <DataGridTextColumn Header="Tổng Thanh Toán" Binding="{Binding TotalAmount, StringFormat={}{0:N0}}" FontWeight="Bold" Width="120"/>
+                            <DataGridTemplateColumn Header="Chọn TK" Width="90">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="✏️ Chọn TK" Padding="6,2" Cursor="Hand"
+                                                Background="#ffc107" Foreground="Black" BorderBrush="#ffc107" BorderThickness="1"
+                                                Command="{Binding DataContext.EditInvoiceAccountCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="" Width="88">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="🗑 Xóa" Margin="4,2" Padding="8,2" Cursor="Hand"
+                                                Background="#fff1f0" Foreground="#cf1322" BorderBrush="#ffa39e" BorderThickness="1"
+                                                Command="{Binding DataContext.DeleteInvoiceCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="💵 Thu Tiền" FontSize="15" FontWeight="Bold">
+                <Grid Margin="15">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- ===== TỔNG HỢP TẤT CẢ KHÁCH HÀNG ===== -->
+                    <UniformGrid Grid.Row="0" Columns="3" Margin="0,0,0,15">
+                        <Border Background="#667eea" CornerRadius="8" Margin="5" Padding="15">
+                            <StackPanel>
+                                <TextBlock Text="TỔNG HÓA ĐƠN" Foreground="White" Opacity="0.9" FontSize="12"/>
+                                <TextBlock Text="{Binding TotalInvoicedAll, StringFormat={}{0:N0} đ}" FontSize="22" FontWeight="Bold" Foreground="White"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#28a745" CornerRadius="8" Margin="5" Padding="15">
+                            <StackPanel>
+                                <TextBlock Text="ĐÃ THU TIỀN" Foreground="White" Opacity="0.9" FontSize="12"/>
+                                <TextBlock Text="{Binding TotalCollectedAll, StringFormat={}{0:N0} đ}" FontSize="22" FontWeight="Bold" Foreground="White"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#dc3545" CornerRadius="8" Margin="5" Padding="15">
+                            <StackPanel>
+                                <TextBlock Text="CÒN PHẢI THU" Foreground="White" Opacity="0.9" FontSize="12"/>
+                                <TextBlock Text="{Binding TotalRemainingAll, StringFormat={}{0:N0} đ}" FontSize="22" FontWeight="Bold" Foreground="White"/>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+
+                    <GroupBox Grid.Row="1" Header="XỬ LÝ THU TIỀN THEO KHÁCH HÀNG" Foreground="#17a2b8" Margin="0,0,0,15">
+                        <Grid Margin="10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- 1. Tìm kiếm khách hàng -->
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                                <TextBlock Text="🔍 Tìm khách hàng:" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,10,0"/>
+                                <ComboBox Width="300" ItemsSource="{Binding FilteredCustomers}"
+                                          SelectedItem="{Binding SelectedDebtCustomer}"
+                                          DisplayMemberPath="Name"
+                                          Text="{Binding SearchCustomerName, UpdateSourceTrigger=PropertyChanged}"
+                                          IsEditable="True" Padding="5" VerticalContentAlignment="Center"/>
+                                
+                                <TextBlock Text="👤 Người thu tiền:" VerticalAlignment="Center" FontWeight="Bold" Margin="20,0,10,0"/>
+                                <ComboBox Width="200" ItemsSource="{Binding AvailableStaff}" SelectedItem="{Binding SelectedStaff}" DisplayMemberPath="FullName" Padding="5"/>
+
+                                <TextBlock Text="📅 Ngày thu:" VerticalAlignment="Center" FontWeight="Bold" Margin="20,0,8,0"/>
+                                <DatePicker Width="125" SelectedDateFormat="Short" SelectedDate="{Binding PaymentCollectionDate, Mode=TwoWay}" VerticalAlignment="Center" ToolTip="Chọn ngày ghi nhận trên phiếu thu (nếu máy sai ngày/giờ hệ thống, chỉnh ở đây)."/>
+
+                                <TextBlock Text="(Hãy chọn nhân viên xử lý)" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="Gray" FontStyle="Italic"/>
+                            </StackPanel>
+
+                            <!-- 2. Thẻ tóm tắt công nợ (Visible khi có dữ liệu khách) -->
+                            <UniformGrid Grid.Row="1" Columns="3" Margin="0,0,0,15" Height="80">
+                                <UniformGrid.Style>
+                                    <Style TargetType="UniformGrid">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CustomerDebtInfo}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </UniformGrid.Style>
+                                <Border Background="#f8f9fa" BorderBrush="#dee2e6" BorderThickness="1" CornerRadius="5" Margin="5">
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock Text="TỔNG PHÁT SINH" FontSize="11" Foreground="#6c757d" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding CustomerDebtInfo.FormattedInvoiced}" FontSize="16" FontWeight="Bold" Foreground="#2c3e50" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="#f8f9fa" BorderBrush="#dee2e6" BorderThickness="1" CornerRadius="5" Margin="5">
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock Text="TỔNG ĐÃ THU" FontSize="11" Foreground="#6c757d" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding CustomerDebtInfo.FormattedPaid}" FontSize="16" FontWeight="Bold" Foreground="#28a745" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="#fff5f5" BorderBrush="#ffc9c9" BorderThickness="1" CornerRadius="5" Margin="5">
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock Text="CÒN NỢ HIỆN TẠI" FontSize="11" Foreground="#fa5252" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding CustomerDebtInfo.FormattedBalance}" FontSize="18" FontWeight="Bold" Foreground="#e03131" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                            </UniformGrid>
+
+                            <!-- 3. Nhập số tiền thu (Visible khi có dữ liệu khách) -->
+                            <Border Grid.Row="2" Background="#e9ecef" CornerRadius="5" Padding="15">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CustomerDebtInfo}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="SỐ TIỀN THU HÔM NAY:" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,15,0"/>
+                                        <TextBox Width="200" Text="{Binding ManualPaymentAmount, StringFormat={}{0:N0}, UpdateSourceTrigger=PropertyChanged}" FontSize="18" FontWeight="Bold" Foreground="Blue" Padding="5" VerticalContentAlignment="Center"/>
+                                        <Button Content="➕" ToolTip="Nhập số tiền thu một phần (vd: nợ 10tr, trả 5tr). Bấm Xác nhận → hỏi lại số tiền → ghi nhận thu tiền mặt và cập nhật công nợ."
+                                                Command="{Binding OpenPartialPaymentWizardCommand}" Width="44" Height="40" Margin="8,0,0,0"
+                                                FontSize="20" FontWeight="Bold" Background="#28a745" Foreground="White" Padding="0" VerticalAlignment="Center" Cursor="Hand"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                        <Button Content="💵 THU TIỀN MẶT" Command="{Binding SmartPaymentCommand}" CommandParameter="Tiền mặt" Background="#28a745" Foreground="White" Width="150" Height="40" FontWeight="Bold" Margin="0,0,10,0"/>
+                                        <Button Content="🏦 CHUYỂN KHOẢN" Command="{Binding OpenBankTransferDialogCommand}" Background="#007bff" Foreground="White" Width="150" Height="40" FontWeight="Bold"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Grid.Row="1" Text="Hãy nhập tên khách hàng để bắt đầu xử lý thu tiền." HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray" FontSize="14" Margin="0,30">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CustomerDebtInfo}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                    </GroupBox>
+
+                    <!-- ===== DANH SÁCH HOÁ ĐƠN CỦA KHÁCH HÀNG ===== -->
+                    <Border Grid.Row="2" Background="#fff8e1" BorderBrush="#ffc107" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="DANH SÁCH HOÁ ĐƠN CHƯA THU" FontWeight="Bold" Foreground="#856404" Margin="0,0,0,8"/>
+                            <TextBlock Text="Chọn hoá đơn để xem thông tin và thu tiền. Danh sách sẽ hiển thị khi bạn chọn khách hàng ở trên." FontStyle="Italic" Foreground="#666" FontSize="11"/>
+                            <DataGrid ItemsSource="{Binding FilteredInvoices}" AutoGenerateColumns="False" IsReadOnly="True" RowHeight="32" Margin="0,8,0,0" MaxHeight="180"
+                                      AlternatingRowBackground="#fff8e1">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Số HĐ" Binding="{Binding InvoiceNo}" Width="100"/>
+                                    <DataGridTextColumn Header="Ngày Lập" Binding="{Binding InvoiceDate, StringFormat=dd/MM/yyyy}" Width="100"/>
+                                    <DataGridTextColumn Header="Tổng Tiền" Binding="{Binding TotalAmount, StringFormat={}{0:N0}}" Width="120" FontWeight="Bold"/>
+                                    <DataGridTextColumn Header="TK Nợ" Binding="{Binding TK_No}" Width="70"/>
+                                    <DataGridTextColumn Header="TK Có" Binding="{Binding TK_Co}" Width="70"/>
+                                    <DataGridTextColumn Header="Loại TK" Binding="{Binding AccountType}" Width="130"/>
+                                    <DataGridTextColumn Header="Trạng thái" Binding="{Binding Status}" Width="100">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Chưa thu">
+                                                        <Setter Property="Foreground" Value="#dc3545"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Đã thu">
+                                                        <Setter Property="Foreground" Value="#28a745"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+
+                    <Grid Grid.Row="3" Margin="0,0,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <DockPanel Grid.Row="0" Margin="0,0,0,8" LastChildFill="False">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Từ ngày:" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,8,0"/>
+                                <DatePicker Width="130" SelectedDateFormat="Short" SelectedDate="{Binding PaymentFilterFromDate, Mode=TwoWay}" VerticalAlignment="Center" ToolTip="Lọc phiếu thu từ ngày này"/>
+                                <TextBlock Text="Đến ngày:" VerticalAlignment="Center" FontWeight="Bold" Margin="15,0,8,0"/>
+                                <DatePicker Width="130" SelectedDateFormat="Short" SelectedDate="{Binding PaymentFilterToDate, Mode=TwoWay}" VerticalAlignment="Center" ToolTip="Lọc phiếu thu đến ngày này"/>
+                                <Button Content="Xóa lọc" Command="{Binding ClearPaymentDateFilterCommand}" Padding="10,5" Margin="10,0,0,0" Background="#6c757d" Foreground="White" ToolTip="Xóa bộ lọc ngày"/>
+                            </StackPanel>
+                            <Button DockPanel.Dock="Right" Content="🔄 Làm mới" Command="{Binding RefreshPaymentStatusTabCommand}" Padding="12,6" VerticalAlignment="Center" Background="#1976d2" Foreground="White" FontWeight="Bold"/>
+                        </DockPanel>
+                        <DataGrid Grid.Row="1" ItemsSource="{Binding FilteredPaymentsList}" AutoGenerateColumns="False" IsReadOnly="True" RowHeight="36" AlternatingRowBackground="#f8f9fa">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Số Phiếu" Binding="{Binding ReceiptNo}" Width="120" FontWeight="SemiBold"/>
+                                <DataGridTextColumn Header="Số HĐ" Binding="{Binding RefInvoiceNo}" Width="110"/>
+                                <DataGridTextColumn Header="Khách Hàng" Binding="{Binding CustomerName}" Width="*"/>
+                                <DataGridTextColumn Header="Số Tiền Thu" Binding="{Binding Amount, StringFormat={}{0:N0}}" FontWeight="Bold" Width="110"/>
+                                <DataGridTextColumn Header="Hình Thức" Binding="{Binding PaymentMethod}" Width="110"/>
+                                <DataGridTextColumn Header="Loại TK" Binding="{Binding AccountType}" Width="120"/>
+                                <DataGridTextColumn Header="Người Thu" Binding="{Binding StaffName}" Width="110"/>
+                                <DataGridTextColumn Header="Ngày Thu" Binding="{Binding PaymentDate, StringFormat=\{0:dd/MM/yyyy HH:mm\}}" Width="140"/>
+                                <DataGridTemplateColumn Header="" Width="88">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="🗑 Xóa" Margin="4,2" Padding="8,2" Cursor="Hand"
+                                                    Background="#fff1f0" Foreground="#cf1322" BorderBrush="#ffa39e" BorderThickness="1"
+                                                    Command="{Binding DataContext.DeletePaymentCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="💳 Trạng Thái Thanh Toán" FontSize="15" FontWeight="Bold">
+                <Grid Margin="15">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" Background="#e3f2fd" CornerRadius="6" Padding="12,10" Margin="0,0,0,12" BorderBrush="#90caf9" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Theo từng đơn hàng: có hóa đơn hay chưa, đã thu / còn nợ (theo phiếu thu gắn số HĐ)." FontWeight="SemiBold" Foreground="#1565c0" TextWrapping="Wrap"/>
+                                <TextBlock Text="Đơn mới lưu chưa lập HĐ sẽ hiển thị «Chưa có hóa đơn»." FontSize="12" Foreground="#546e7a" Margin="0,6,0,0"/>
+                            </StackPanel>
+                            <Button Grid.Column="1" Content="🔄 Làm mới" Command="{Binding RefreshPaymentStatusTabCommand}" Padding="12,6" VerticalAlignment="Center" Background="#1976d2" Foreground="White" FontWeight="Bold"/>
+                        </Grid>
+                    </Border>
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding OrderPaymentStatusList}" AutoGenerateColumns="False" IsReadOnly="True" RowHeight="36" AlternatingRowBackground="#f8f9fa">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Số Đơn" Binding="{Binding OrderNo}" Width="120" FontWeight="SemiBold"/>
+                            <DataGridTextColumn Header="Khách Hàng" Binding="{Binding CustomerName}" Width="*"/>
+                            <DataGridTextColumn Header="Ngày ĐH" Binding="{Binding OrderDate, StringFormat=dd/MM/yyyy}" Width="95"/>
+                            <DataGridTextColumn Header="Số HĐ" Binding="{Binding InvoiceNo}" Width="130"/>
+                            <DataGridTextColumn Header="Tiền ĐH" Binding="{Binding OrderTotal, StringFormat={}{0:N0}}" Width="110"/>
+                            <DataGridTextColumn Header="Tổng HĐ" Binding="{Binding InvoiceTotal, StringFormat={}{0:N0}}" Width="110"/>
+                            <DataGridTextColumn Header="Đã Thu" Binding="{Binding PaidAmount, StringFormat={}{0:N0}}" Foreground="#2e7d32" FontWeight="Bold" Width="110"/>
+                            <DataGridTextColumn Header="Còn Nợ" Binding="{Binding Remaining, StringFormat={}{0:N0}}" Foreground="#c62828" FontWeight="Bold" Width="110"/>
+                            <DataGridTemplateColumn Header="Trạng Thái TT" Width="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border CornerRadius="4" Padding="6,3" HorizontalAlignment="Center">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#78909c"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding PaymentStatus}" Value="Đã thanh toán">
+                                                            <Setter Property="Background" Value="#2e7d32"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding PaymentStatus}" Value="Thanh toán một phần">
+                                                            <Setter Property="Background" Value="#f9a825"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding PaymentStatus}" Value="Chưa thanh toán">
+                                                            <Setter Property="Background" Value="#c62828"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding PaymentStatus}" Value="Chưa có hóa đơn">
+                                                            <Setter Property="Background" Value="#546e7a"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="{Binding PaymentStatus}" Foreground="White" FontWeight="Bold" FontSize="11" TextAlignment="Center"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="📊 Báo Cáo Công Nợ" FontSize="15" FontWeight="Bold">
+                <TabControl Background="Transparent" BorderThickness="0">
+                    <TabItem Header="📋 Chi Tiết Công Nợ">
+                        <Grid Margin="15">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <UniformGrid Grid.Row="0" Columns="3" Margin="0,0,0,20">
+                                <Border Background="#dc3545" CornerRadius="8" Margin="5" Padding="15">
+                                    <StackPanel>
+                                        <TextBlock Text="TỔNG NỢ PHẢI THU" Foreground="White" Opacity="0.9"/>
+                                        <TextBlock Text="{Binding TotalDebt, StringFormat={}{0:N0} đ}" FontSize="24" FontWeight="Bold" Foreground="White"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="#ffc107" CornerRadius="8" Margin="5" Padding="15">
+                                    <StackPanel>
+                                        <TextBlock Text="NỢ QUÁ HẠN" Foreground="Black" Opacity="0.9"/>
+                                        <TextBlock Text="{Binding OverdueDebt, StringFormat={}{0:N0} đ}" FontSize="24" FontWeight="Bold" Foreground="Black"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="#667eea" CornerRadius="8" Margin="5" Padding="15">
+                                    <StackPanel>
+                                        <TextBlock Text="SỐ KHÁCH NỢ" Foreground="White" Opacity="0.9"/>
+                                        <TextBlock Text="{Binding DebtCustomerCount}" FontSize="24" FontWeight="Bold" Foreground="White"/>
+                                    </StackPanel>
+                                </Border>
+                            </UniformGrid>
+                            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12" VerticalAlignment="Center">
+                                <TextBlock Text="Tìm kiếm:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
+                                <ComboBox x:Name="DebtReportSearchCombo"
+                                          MinWidth="400" MaxWidth="560" IsEditable="True" IsTextSearchEnabled="True"
+                                          ToolTip="Gõ tên khách, số HĐ hoặc chọn khách trong danh sách"
+                                          ItemsSource="{Binding DebtReportSearchHints}"
+                                          Text="{Binding DebtReportSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                          SelectionChanged="DebtReportSearchCombo_SelectionChanged"/>
+                            </StackPanel>
+                            <DataGrid Grid.Row="2" ItemsSource="{Binding DebtReports}" AutoGenerateColumns="False" IsReadOnly="True" RowHeight="35" AlternatingRowBackground="#f8f9fa">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Khách Hàng" Binding="{Binding CustomerName}" Width="*" FontWeight="Bold"/>
+                                    <DataGridTextColumn Header="Số HĐ" Binding="{Binding InvoiceNo}" Width="100"/>
+                                    <DataGridTextColumn Header="Ngày HĐ" Binding="{Binding InvoiceDate, StringFormat=dd/MM/yyyy}" Width="90"/>
+                                    <DataGridTextColumn Header="Tổng HĐ" Binding="{Binding TotalAmount, StringFormat={}{0:N0}}" Width="120"/>
+                                    <DataGridTextColumn Header="Đã Thu" Binding="{Binding PaidAmount, StringFormat={}{0:N0}}" Foreground="#28a745" FontWeight="Bold" Width="120"/>
+                                    <DataGridTextColumn Header="Còn Nợ" Binding="{Binding RemainingDebt, StringFormat={}{0:N0}}" Foreground="Red" FontWeight="Bold" Width="120"/>
+                                    <DataGridTemplateColumn Header="TT" Width="80">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border CornerRadius="3" Padding="5,2">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="#6c757d"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Status}" Value="Quá hạn">
+                                                                    <Setter Property="Background" Value="#dc3545"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Status}" Value="Trong hạn">
+                                                                    <Setter Property="Background" Value="#28a745"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock Text="{Binding Status}" HorizontalAlignment="Center" Foreground="White" FontWeight="Bold" FontSize="11"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </TabItem>
+
+                    <TabItem Header="📈 Tổng Hợp Công Nợ (TK 131)">
+                        <Grid Margin="15">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12" VerticalAlignment="Center">
+                                <TextBlock Text="Kỳ báo cáo:" VerticalAlignment="Center" Margin="0,0,8,0" FontWeight="SemiBold"/>
+                                <DatePicker SelectedDate="{Binding DebtSummaryFromDate}" Width="130" Margin="0,0,16,0"/>
+                                <TextBlock Text="→" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                                <DatePicker SelectedDate="{Binding DebtSummaryToDate}" Width="130" Margin="0,0,16,0"/>
+                                <Button Content="🔄 Xem báo cáo" Command="{Binding LoadDebtSummaryCommand}" Background="#17a2b8" Foreground="White" Padding="16,6"/>
+                                <Button Content="📊 Xuất Excel" Command="{Binding ExportDebtSummaryExcelCommand}" Background="#28a745" Foreground="White" Padding="16,6" Margin="8,0,0,0"/>
+                            </StackPanel>
+                            <DataGrid Grid.Row="1" ItemsSource="{Binding DebtSummaryRows}" AutoGenerateColumns="False" IsReadOnly="True"
+                                      RowHeight="38" AlternatingRowBackground="#f0f4ff" HeadersVisibility="Column" FrozenColumnCount="1">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Tên khách hàng" Binding="{Binding CustomerName}" Width="*" FontWeight="Bold"/>
+                                    <DataGridTextColumn Header="Nợ đầu kỳ" Binding="{Binding OpeningDebt, StringFormat={}{0:N0}}" Width="130" Foreground="#c62828"/>
+                                    <DataGridTextColumn Header="Phát sinh Nợ" Binding="{Binding PeriodDebt, StringFormat={}{0:N0}}" Width="130" Foreground="#c62828"/>
+                                    <DataGridTextColumn Header="Phát sinh Có" Binding="{Binding PeriodCredit, StringFormat={}{0:N0}}" Width="130" Foreground="#2e7d32"/>
+                                    <DataGridTextColumn Header="Nợ cuối kỳ" Binding="{Binding ClosingDebt, StringFormat={}{0:N0}}" Width="130" Foreground="#c62828" FontWeight="Bold"/>
+                                    <DataGridTextColumn Header="Số HĐ" Binding="{Binding InvoiceCount}" Width="80"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </TabItem>
+
+        </TabControl>
+    </Grid>
+</Window>

@@ -1,0 +1,55 @@
+<Window x:Class="PhanMemInAnERP.Views.InvoiceAccountDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Chọn Tài Khoản Kế Toán" Height="250" Width="450" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <GroupBox Header="Thông tin Tài Khoản" FontWeight="Bold" FontSize="14" Grid.Row="0" Margin="0,0,0,10">
+            <StackPanel Margin="10">
+                <TextBlock Text="Hoá đơn:" FontWeight="SemiBold"/>
+                <TextBox Text="{Binding InvoiceNo, Mode=OneWay}" IsReadOnly="True" Margin="0,0,0,10" Padding="4"/>
+
+                <TextBlock Text="Khách hàng:" FontWeight="SemiBold"/>
+                <TextBox Text="{Binding CustomerName, Mode=OneWay}" IsReadOnly="True" Margin="0,0,0,15" Padding="4"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="TK Nợ (TK_No):" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding TK_No}" Padding="4"/>
+
+                    <TextBlock Grid.Row="0" Grid.Column="3" Text="TK Có (TK_Co):" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBox Grid.Row="0" Grid.Column="4" Text="{Binding TK_Co}" Padding="4"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Loại TK:" VerticalAlignment="Center" Margin="0,10,5,0"/>
+                    <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding AccountTypeOptions}"
+                              SelectedItem="{Binding AccountType}" Padding="4" Margin="0,10,0,0"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="3" Text="Tổng tiền:" VerticalAlignment="Center" Margin="0,10,5,0"/>
+                    <TextBlock Grid.Row="1" Grid.Column="4" Text="{Binding TotalAmount, StringFormat={}{0:N0} VNĐ}" Padding="4" Margin="0,10,0,0"/>
+                </Grid>
+            </StackPanel>
+        </GroupBox>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="💾 Lưu" Width="80" Margin="0,0,10,0" Click="Save_Click" Background="#28a745" Foreground="White"/>
+            <Button Content="❌ Hủy" Width="80" Click="Cancel_Click" Background="#dc3545" Foreground="White"/>
+        </StackPanel>
+    </Grid>
+</Window>

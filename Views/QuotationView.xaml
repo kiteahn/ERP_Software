@@ -1,0 +1,542 @@
+<Window x:Class="PhanMemInAnERP.Views.QuotationView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PhanMemInAnERP.Views"
+        xmlns:vm="clr-namespace:PhanMemInAnERP.ViewModels"
+        xmlns:helpers="clr-namespace:PhanMemInAnERP.Helpers"
+        mc:Ignorable="d"
+        Title="Phần Mềm Tính Giá In Ấn - ERP" Height="800" Width="1200" WindowStartupLocation="CenterScreen">
+
+    <Window.DataContext>
+        <vm:QuotationViewModel/>
+    </Window.DataContext>
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <helpers:VnMoneyFormatConverter x:Key="VnMoneyConv"/>
+        <helpers:VisibleWhenCostPositiveConverter x:Key="VisIfCostPositive"/>
+        <helpers:InverseBooleanConverter x:Key="InvBool"/>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="400"/>
+        </Grid.ColumnDefinitions>
+
+        <ScrollViewer Grid.Column="0" Margin="0,0,20,0" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+
+                <GroupBox Header="1. THÔNG TIN KHÁCH &amp; SẢN PHẨM" Margin="0,0,0,15" FontWeight="Bold" Foreground="#667eea">
+                    <Grid Margin="10" TextElement.FontWeight="Normal" TextElement.Foreground="Black">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="110"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Hàng 1: Khách hàng + Sản phẩm -->
+                        <TextBlock Text="Khách hàng:" VerticalAlignment="Center"/>
+                        <Grid Grid.Column="1" Margin="0,0,15,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ComboBox Grid.Column="0"
+                                      ItemsSource="{Binding AvailableCustomers}"
+                                      SelectedItem="{Binding SelectedCustomer}"
+                                      DisplayMemberPath="Name"
+                                      IsEditable="True"
+                                      Text="{Binding CustomerName, UpdateSourceTrigger=PropertyChanged}"
+                                      VerticalContentAlignment="Center" Margin="0,0,5,0"/>
+                            <Button Grid.Column="1" Content="+" Command="{Binding ShowAddCustomerCommand}"
+                                    Background="#28a745" Foreground="White" Width="30" Height="30" Padding="0" FontWeight="Bold" ToolTip="Thêm mới khách hàng"/>
+                        </Grid>
+
+                        <TextBlock Grid.Column="2" Text="Tên sản phẩm:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="3" Text="{Binding ProductName, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center"/>
+
+                        <!-- Hàng 2: Địa chỉ + Mã số thuế -->
+                        <TextBlock Grid.Row="1" Text="Địa chỉ khách:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding CustomerAddress, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,15,0"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="Mã số thuế:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding CustomerTaxCode, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" ToolTip="Mã số thuế khách hàng — sẽ tự điền vào đơn hàng khi tạo."/>
+
+                        <!-- Hàng 3: Số lượng + Kích thước -->
+                        <TextBlock Grid.Row="2" Text="Số lượng (cái):" VerticalAlignment="Center"/>
+                        <Grid Grid.Row="2" Grid.Column="1" Margin="0,0,15,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ComboBox Grid.Column="0"
+                                      ItemsSource="{Binding QuantityChoices}"
+                                      SelectedValue="{Binding Quantity, Mode=TwoWay}"
+                                      SelectedValuePath="Value"
+                                      DisplayMemberPath="Label"
+                                      MinHeight="28"
+                                      Padding="6,4"
+                                      VerticalContentAlignment="Center"
+                                      ToolTip="Chọn số lượng (ví dụ 20.000) — Tổng tiền dây / nút = giá/cái × số lượng, tự cập nhật bên dưới."/>
+                            <Button Grid.Column="1" Content="+" Command="{Binding IncrementQuantityCommand}"
+                                    Background="#28a745" Foreground="White" Width="32" Height="30" Margin="6,0,0,0" Padding="0" FontWeight="Bold"
+                                    ToolTip="Cộng thêm 500 cái vào số lượng hiện tại."/>
+                        </Grid>
+
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="Kích thước (DxRxC):" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding ProductDimensions, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" ToolTip="Ví dụ: 39x27x9 cm"/>
+
+                        <!-- Hàng 4: Số báo giá + Ngày báo giá -->
+                        <TextBlock Grid.Row="3" Text="Số báo giá:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding QuoteNo, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" FontWeight="Bold" Margin="0,0,15,0"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="2" Text="Ngày báo giá:" VerticalAlignment="Center"/>
+                        <DatePicker Grid.Row="3" Grid.Column="3" SelectedDate="{Binding QuotationDate}" VerticalContentAlignment="Center"/>
+                    </Grid>
+                </GroupBox>
+
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,10,0">
+                        <TextBlock Text="Hiệu lực báo giá:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBox Text="{Binding ValidityDays, UpdateSourceTrigger=PropertyChanged}" Width="50" VerticalContentAlignment="Center"/>
+                        <TextBlock Text=" ngày" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <TextBlock Text="Thời gian giao hàng:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBox Text="{Binding DeliveryDays, UpdateSourceTrigger=PropertyChanged}" Width="50" VerticalContentAlignment="Center"/>
+                        <TextBlock Text=" ngày" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+
+                <GroupBox Header="2. THÔNG SỐ VẬT TƯ &amp; IN ẤN" Margin="0,0,0,15" FontWeight="Bold" Foreground="#667eea">
+                    <StackPanel TextElement.FontWeight="Normal" TextElement.Foreground="Black">
+                    <Grid Margin="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="35"/>
+                            <RowDefinition Height="35"/>
+                            <RowDefinition Height="35"/>
+                            <RowDefinition Height="35"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Khổ in (Dài cm):" VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="1" Text="{Binding PrintLength, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0" VerticalContentAlignment="Center"/>
+
+                        <TextBlock Grid.Column="2" Text="Khổ in (Rộng cm):" VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="3" Text="{Binding PrintWidth, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="10,0,0,0" HorizontalAlignment="Stretch"/>
+
+                        <TextBlock Grid.Row="1" Text="Chọn giấy (Từ Kho):" VerticalAlignment="Center" FontWeight="Bold" Foreground="#d32f2f"/>
+                        <Grid Grid.Row="1" Grid.Column="1" Margin="0,0,10,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <!-- ComboBox: click hiện list đầy đủ, gõ để filter/gợi ý -->
+                            <ComboBox Grid.Column="0"
+                                      IsEditable="True"
+                                      IsTextSearchEnabled="True"
+                                      ItemsSource="{Binding PaperMaterialsForSelection}"
+                                      SelectedItem="{Binding SelectedPaper}"
+                                      DisplayMemberPath="Name"
+                                      Text="{Binding PaperNameText, UpdateSourceTrigger=PropertyChanged}"
+                                      Padding="5" VerticalContentAlignment="Center"
+                                      ToolTip="Click để xem danh sách đầy đủ, hoặc gõ tên để lọc/gợi ý. VD: Couche, Ivory, Kraft..."/>
+                            <Button Grid.Column="1" Content="🗑️"
+                                    Command="{Binding DeletePaperCommand}"
+                                    CommandParameter="{Binding SelectedPaper}"
+                                    Background="#dc3545" Foreground="White" Width="35" Height="30" Margin="6,0,0,0" Padding="0"
+                                    ToolTip="Xóa loại giấy đã chọn"/>
+                            <Button Grid.Column="2" Content="+" Command="{Binding ShowAddPaperCommand}"
+                                    Background="#28a745" Foreground="White" Width="30" Height="30" Margin="6,0,0,0" Padding="0" FontWeight="Bold"
+                                    ToolTip="Thêm loại giấy mới vào kho"/>
+                        </Grid>
+
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="Giá giấy (VNĐ/tấn):" VerticalAlignment="Center" Foreground="Blue"
+                                   ToolTip="Nhập/chỉnh sửa trực tiếp — dùng tính đơn giá 1 ram (500 tờ) và tiền giấy. Ví dụ Couche 250gsm: 26.000.000 đ/tấn."/>
+                        <TextBox Grid.Row="1" Grid.Column="3"
+                                 Text="{Binding PaperPricePerTon, Converter={StaticResource VnMoneyConv}, UpdateSourceTrigger=PropertyChanged, Delay=300}"
+                                 Foreground="#dc3545" FontWeight="Bold"
+                                 VerticalContentAlignment="Center" Margin="10,0,0,0" HorizontalAlignment="Stretch"
+                                 ToolTip="Đơn giá 1 ram = (Khổ dài×rộng/10000)×(gsm/1000)×500×(Giá tấn/1000). Số tờ = (SL÷Số con/tờ)+Bù hao; số ram = làm tròn lên (tờ÷500); tiền giấy = ram×đơn giá ram."/>
+
+                        <TextBlock Grid.Row="2" Text="Định lượng (gsm):" VerticalAlignment="Center" Foreground="Blue"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding PaperGsm, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0" VerticalContentAlignment="Center"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="Số con/tờ:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding SoCon, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="10,0,0,0" HorizontalAlignment="Stretch"/>
+
+                        <TextBlock Grid.Row="3" Text="Bù hao (tờ):" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding BuHao, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0" VerticalContentAlignment="Center"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="2" Text="Số màu in:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding ColorCount, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="10,0,0,0" HorizontalAlignment="Stretch"/>
+
+                        <TextBlock Grid.Row="4" Text="Tiền kẽm:" VerticalAlignment="Top" Margin="0,6,0,0" Foreground="#1565c0"
+                                   ToolTip="Chọn một loại máy. Tổng kẽm = số màu × đơn giá/màu. Máy lớn mặc định 100.000đ/kẽm; máy nhỏ 60.000đ/kẽm (sửa qua nút Sửa giá kẽm)."/>
+                        <StackPanel Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" Margin="0,4,0,4">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                <RadioButton Content="In máy lớn (100.000đ/kẽm)" GroupName="PlateMachine"
+                                             IsChecked="{Binding IsLargeMachine, Mode=TwoWay}"
+                                             VerticalAlignment="Center" Margin="0,0,20,0"/>
+                                <RadioButton Content="In máy nhỏ (60.000đ/kẽm)" GroupName="PlateMachine"
+                                             IsChecked="{Binding IsLargeMachine, Converter={StaticResource InvBool}, Mode=TwoWay}"
+                                             VerticalAlignment="Center" Margin="0,0,16,0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Giá kẽm/màu (VNĐ):" VerticalAlignment="Center" Foreground="#1565c0" Margin="0,0,8,0"/>
+                                <TextBox Width="160"
+                                         Text="{Binding SelectedPlatePricePerColor, Converter={StaticResource VnMoneyConv}, UpdateSourceTrigger=PropertyChanged, Delay=300}"
+                                         VerticalContentAlignment="Center" FontWeight="SemiBold" Foreground="#1565c0" Margin="0,0,12,0"/>
+                                <Button Content="Sửa giá kẽm…" Command="{Binding EditPlatePricesCommand}" Padding="10,6"
+                                        ToolTip="Đổi đơn giá mặc định cho máy lớn và máy nhỏ (lưu trên máy, áp dụng báo giá mới)."/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="3. GIA CÔNG &amp; CHI PHÍ KHÁC" Margin="0,0,0,15" FontWeight="Bold" Foreground="#667eea">
+                    <!-- Cùng lưới 140,*,140,* và margin như mục 1–2: nhãn trái, ô Stretch rộng đồng bộ -->
+                    <Grid Margin="10" TextElement.FontWeight="Normal" TextElement.Foreground="Black">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="35"/>
+                            <RowDefinition Height="35"/>
+                            <RowDefinition Height="35"/>
+                            <RowDefinition Height="35"/>
+                            <RowDefinition Height="35"/>
+                            <RowDefinition Height="35"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Loại màng cán:" VerticalAlignment="Center"/>
+                        <ComboBox Grid.Row="0" Grid.Column="1"
+                                  ItemsSource="{Binding LaminationTypeOptions}"
+                                  SelectedItem="{Binding LaminationType, UpdateSourceTrigger=PropertyChanged}"
+                                  Margin="0,0,10,0" Padding="5" VerticalContentAlignment="Center" HorizontalAlignment="Stretch"
+                                  ToolTip="Chọn loại → đơn giá cán màng tự điền (có thể sửa tay)."/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Đơn giá cán màng:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="1" Grid.Column="1"
+                                 Text="{Binding LaminationPrice, Converter={StaticResource VnMoneyConv}, UpdateSourceTrigger=PropertyChanged, Delay=300}"
+                                 Margin="0,0,10,0" VerticalContentAlignment="Center" HorizontalAlignment="Stretch"
+                                 ToolTip="Auto theo loại màng (Bóng/Mờ/Không cán); có thể chỉnh lại nếu giá đặc biệt."/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="Số mặt cán:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="1" Grid.Column="3"
+                                 Text="{Binding LaminationSides, Converter={StaticResource VnMoneyConv}, UpdateSourceTrigger=PropertyChanged, Delay=300}"
+                                 Margin="10,0,0,0" VerticalContentAlignment="Center" HorizontalAlignment="Stretch"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Giá làm khuôn:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="2" Grid.Column="1"
+                                 Text="{Binding DieCutMoldPrice, Converter={StaticResource VnMoneyConv}, UpdateSourceTrigger=PropertyChanged, Delay=300}"
+                                 Margin="0,0,10,0" VerticalContentAlignment="Center" HorizontalAlignment="Stretch"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="Phí vận chuyển:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="2" Grid.Column="3"
+                                 Text="{Binding DeliveryFee, Converter={StaticResource VnMoneyConv}, UpdateSourceTrigger=PropertyChanged, Delay=300}"
+                                 Margin="10,0,0,0" VerticalContentAlignment="Center" HorizontalAlignment="Stretch"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Tiền in proof:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="3" Grid.Column="1"
+                                 Text="{Binding PrintProofFee, Converter={StaticResource VnMoneyConv}, UpdateSourceTrigger=PropertyChanged, Delay=300}"
+                                 Margin="0,0,10,0" VerticalContentAlignment="Center" HorizontalAlignment="Stretch"
+                                 ToolTip="In thử — một khoản cố định cho đơn (mặc định 100.000đ). Nhập 0 nếu không tính."/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Tổng tiền dây:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="4" Grid.Column="1"
+                                 Text="{Binding StringCostTotalText, UpdateSourceTrigger=PropertyChanged, Delay=300}"
+                                 Margin="0,0,10,0" VerticalContentAlignment="Center" HorizontalAlignment="Stretch"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="2" Text="Tổng tiền nút:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="4" Grid.Column="3"
+                                 Text="{Binding ButtonCostTotalText, UpdateSourceTrigger=PropertyChanged, Delay=300}"
+                                 Margin="10,0,0,0" VerticalContentAlignment="Center" HorizontalAlignment="Stretch"/>
+
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Tổng tiền thùng:" VerticalAlignment="Center"
+                                   ToolTip="500 cái/thùng. Tổng = số thùng (làm tròn lên) × giá 1 thùng; đổi số lượng tự cập nhật. Sửa ô số để đổi giá 1 thùng."/>
+                        <TextBox Grid.Row="5" Grid.Column="1"
+                                 Text="{Binding BoxCostTotalText, UpdateSourceTrigger=PropertyChanged, Delay=300}"
+                                 Margin="0,0,10,0" VerticalContentAlignment="Center" HorizontalAlignment="Stretch"
+                                 ToolTip="500 cái/thùng — sửa tổng → cập nhật giá 1 thùng."/>
+
+                        <TextBlock Grid.Row="5" Grid.Column="2" Text="% LỢI NHUẬN:" VerticalAlignment="Center"
+                                   Foreground="#0000FF" FontWeight="Bold"/>
+                        <TextBox Grid.Row="5" Grid.Column="3"
+                                 Text="{Binding ProfitMargin, Converter={StaticResource VnMoneyConv}, UpdateSourceTrigger=PropertyChanged, Delay=300}"
+                                 Margin="10,0,0,0" VerticalContentAlignment="Center" HorizontalAlignment="Stretch"
+                                 Foreground="#0000FF" FontWeight="Bold"/>
+                    </Grid>
+                </GroupBox>
+
+                <GroupBox Header="4. CHI PHÍ PHÁT SINH TÙY BIẾN" FontWeight="Bold" Foreground="#667eea">
+                    <StackPanel Margin="10">
+                        <DataGrid ItemsSource="{Binding ExtraCosts}" AutoGenerateColumns="False" CanUserAddRows="False" Height="150" TextElement.FontWeight="Normal" TextElement.Foreground="Black">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Tên chi phí" Binding="{Binding ItemName, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                <DataGridTextColumn Header="Số lượng" Binding="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                                <DataGridTextColumn Header="Đơn giá" Binding="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged}" Width="120"/>
+                                <DataGridTemplateColumn Header="" Width="72">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="🗑 Xóa"
+                                                    Command="{Binding DataContext.RemoveExtraCostCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}"
+                                                    Background="#dc3545" Foreground="White" Padding="6,2" Cursor="Hand" FontSize="11"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Button Content="+ Thêm dòng" Command="{Binding AddExtraCostCommand}" Background="#17a2b8" Foreground="White" Width="120" Padding="5" Margin="0,0,10,0"/>
+                            <Button Content="🧮 Cập nhật bảng" Command="{Binding RecalculateCommand}" Background="#6c757d" Foreground="White" Width="120" Padding="5"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="5. BẢNG GIÁ THEO SỐ LƯỢNG (DỰ KIẾN)" FontWeight="Bold" Foreground="#28a745" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="Chọn một dòng: bảng chi tiết giá vốn bên phải sẽ hiển thị theo số lượng đó. Đổi số lượng trên form sẽ bỏ chọn." TextWrapping="Wrap" Foreground="#555" FontSize="11" Margin="0,0,0,6"/>
+                        <DataGrid ItemsSource="{Binding PriceMatrix}" SelectedItem="{Binding SelectedPriceMatrixRow, Mode=TwoWay}"
+                              SelectionMode="Single" SelectionUnit="FullRow"
+                              AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" Height="220" TextElement.FontWeight="Normal" TextElement.Foreground="Black" Background="White">
+                            <DataGrid.RowStyle>
+                                <Style TargetType="DataGridRow">
+                                    <Setter Property="ToolTip">
+                                        <Setter.Value>
+                                            <ToolTip MaxWidth="420" Placement="MousePoint">
+                                                <TextBlock Text="{Binding DetailTooltip}" TextWrapping="Wrap" FontSize="12"/>
+                                            </ToolTip>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </DataGrid.RowStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Số lượng" Binding="{Binding Quantity, StringFormat={}{0:N0}}" Width="90"/>
+                                <DataGridTextColumn Header="Giá một SP (gồm LN)" Binding="{Binding QuotedUnitPrice, StringFormat={}{0:N0} đ}" Width="*"/>
+                                <DataGridTextColumn Header="Tổng đơn hàng" Binding="{Binding TotalValue, StringFormat={}{0:N0} đ}" Width="*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </GroupBox>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Column="1" Background="#f8f9fa" CornerRadius="10" Padding="20" BorderBrush="#e0e0e0" BorderThickness="1">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8" HorizontalAlignment="Center">
+                    <TextBlock Text="BẢNG CHI TIẾT GIÁ VỐN" VerticalAlignment="Center" FontSize="18" FontWeight="Bold" Foreground="#28a745"/>
+                    <Button Content="Chi tiết" Margin="14,0,0,0" Padding="12,5" VerticalAlignment="Center"
+                            Command="{Binding ShowCostDetailCommand}" Background="#28a745" Foreground="White" Cursor="Hand"
+                            ToolTip="Xem toàn bộ công thức và từng khoản theo số lượng đang xem"/>
+                </StackPanel>
+                <TextBlock Text="{Binding SidebarCostQuantityHint}" FontSize="11" Foreground="#666" TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                <TextBlock FontSize="11" Foreground="#e65100" TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,12"
+                           Text="{Binding PrintSizeMismatchWarning}"
+                           Visibility="{Binding HasPrintSizeMismatch, Converter={StaticResource BoolToVis}}"/>
+
+                <StackPanel Orientation="Horizontal" Margin="0,8">
+                    <TextBlock Text="Tiền giấy:" Width="150"
+                               ToolTip="Chỉ NVL (số ram × đơn giá ram theo Khổ in mục 2). Không gồm tiền in proof — dòng «Tiền in proof» tính riêng bên dưới."/>
+                    <TextBlock Text="{Binding PaperCost, StringFormat={}{0:N0} đ}" FontWeight="Bold"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,8">
+                    <TextBlock Text="Tiền kẽm:" Width="150"/>
+                    <TextBlock Text="{Binding PlateCost, StringFormat={}{0:N0} đ}" FontWeight="Bold"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,8">
+                    <TextBlock Text="Tiền in:" Width="150"/>
+                    <TextBlock Text="{Binding PrintCost, StringFormat={}{0:N0} đ}" FontWeight="Bold"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,8">
+                    <TextBlock Text="Tiền cán màng:" Width="150"/>
+                    <TextBlock Text="{Binding LaminationCost, StringFormat={}{0:N0} đ}" FontWeight="Bold"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,8">
+                    <TextBlock Text="Tiền bế:" Width="150"/>
+                    <TextBlock Text="{Binding DieCutCost, StringFormat={}{0:N0} đ}" FontWeight="Bold"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,8">
+                    <TextBlock Text="Tiền dán:" Width="150"/>
+                    <TextBlock Text="{Binding GluingCost, StringFormat={}{0:N0} đ}" FontWeight="Bold"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,8">
+                    <TextBlock Text="Tiền in proof:" Width="150"/>
+                    <TextBlock Text="{Binding PrintProofFee, StringFormat={}{0:N0} đ}" FontWeight="Bold"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,8">
+                    <TextBlock Text="Chi phí khác:" Width="150"
+                               ToolTip="Dây, nút, thùng, xe, khuôn bế và phát sinh (không gồm tiền in proof)."/>
+                    <TextBlock Text="{Binding OtherCostExcludingProof, StringFormat={}{0:N0} đ}" FontWeight="Bold"/>
+                </StackPanel>
+
+                <Separator Margin="0,15"/>
+
+                <StackPanel Orientation="Horizontal" Margin="0,5">
+                    <TextBlock Text="TỔNG CHI PHÍ SX:" Width="150" Foreground="#dc3545" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding TotalProductionCost, StringFormat={}{0:N0} đ}" Foreground="#dc3545" FontWeight="Bold" FontSize="16"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,12,0,5">
+                    <TextBlock Text="Giá một sản phẩm:" Width="150" Foreground="Blue" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding QuotedUnitPrice, StringFormat={}{0:N0} đ/cái}" Foreground="Blue" FontWeight="Bold" FontSize="16"/>
+                </StackPanel>
+
+                <Border Background="#d4edda" CornerRadius="5" Padding="15" Margin="0,20,0,0">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="TỔNG GIÁ TRỊ ĐƠN HÀNG" Foreground="#155724" FontWeight="Bold" TextAlignment="Center" Margin="0,0,0,5"/>
+                        <TextBlock Text="{Binding TotalOrderValue, StringFormat={}{0:N0} VNĐ}" Foreground="#155724" FontWeight="Bold" FontSize="22" TextAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <Button Content="💾 LƯU BÁO GIÁ" Command="{Binding SaveQuoteCommand}" Background="#667eea" Foreground="White" Margin="0,20,0,0" Padding="15" FontSize="16" FontWeight="Bold" Cursor="Hand"/>
+
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Center">
+                    <Button Content="📄 Xuất PDF" Command="{Binding ExportPdfCommand}" Background="#17a2b8" Foreground="White" Width="100" Padding="8" Margin="0,0,10,0"/>
+                    <Button Content="📊 Xuất Excel" Command="{Binding ExportExcelCommand}" Background="#ffc107" Foreground="Black" Width="100" Padding="8"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- OVERLAY: THÊM KHÁCH HÀNG MỚI -->
+        <Grid Grid.ColumnSpan="2" Background="#80000000" Visibility="{Binding IsAddCustomerPopupOpen, Converter={StaticResource BoolToVis}}" Panel.ZIndex="1000">
+            <Border Background="White" Width="500" VerticalAlignment="Center" HorizontalAlignment="Center" CornerRadius="10" Padding="30" BorderBrush="#667eea" BorderThickness="2">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="15" ShadowDepth="5" Opacity="0.3"/>
+                </Border.Effect>
+                <StackPanel>
+                    <TextBlock Text="➕ THÊM KHÁCH HÀNG MỚI" FontSize="20" FontWeight="Bold" Foreground="#667eea" Margin="0,0,0,25" HorizontalAlignment="Center"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="45"/>
+                            <RowDefinition Height="45"/>
+                            <RowDefinition Height="45"/>
+                            <RowDefinition Height="45"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Tên khách:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="1" Text="{Binding NewCustomerName}" Margin="0,5" Padding="5" VerticalContentAlignment="Center"/>
+
+                        <TextBlock Grid.Row="1" Text="Điện thoại:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding NewCustomerPhone}" Margin="0,5" Padding="5" VerticalContentAlignment="Center"/>
+
+                        <TextBlock Grid.Row="2" Text="Địa chỉ:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding NewCustomerAddress}" Margin="0,5" Padding="5" VerticalContentAlignment="Center"/>
+
+                        <TextBlock Grid.Row="3" Text="Mã số thuế:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding NewCustomerTaxCode}" Margin="0,5" Padding="5" VerticalContentAlignment="Center"/>
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,25,0,0">
+                        <Button Content="Hủy" Command="{Binding CancelAddCustomerCommand}" Background="#6c757d" Foreground="White" Width="100" Margin="0,0,10,0">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="IsCancel" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsAddCustomerPopupOpen}" Value="True">
+                                            <Setter Property="IsCancel" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <Button Content="💾 Lưu lại" Command="{Binding SaveNewCustomerCommand}" Background="#28a745" Foreground="White" Width="120" FontWeight="Bold">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="IsDefault" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsAddCustomerPopupOpen}" Value="True">
+                                            <Setter Property="IsDefault" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- OVERLAY: THÊM GIẤY (TAB) -->
+        <Grid Grid.ColumnSpan="2" Background="#80000000" Visibility="{Binding IsAddPaperPopupOpen, Converter={StaticResource BoolToVis}}" Panel.ZIndex="1001">
+            <Border Background="White" Width="520" MaxHeight="520" VerticalAlignment="Center" HorizontalAlignment="Center" CornerRadius="10" Padding="20" BorderBrush="#d32f2f" BorderThickness="2">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="15" ShadowDepth="5" Opacity="0.3"/>
+                </Border.Effect>
+                <TabControl>
+                    <TabItem Header="Thêm giấy &amp; giá xuất kho">
+                        <StackPanel Margin="0,12,0,0">
+                            <TextBlock Text="Nhập loại giấy mới — sẽ lưu vào kho (Danh mục Giấy) và chọn ngay trên báo giá." TextWrapping="Wrap" Foreground="#555" Margin="0,0,0,16"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="130"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="42"/>
+                                    <RowDefinition Height="42"/>
+                                    <RowDefinition Height="42"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Text="Tên giấy:" VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="1" Text="{Binding NewPaperName, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" Padding="6" VerticalContentAlignment="Center"
+                                         ToolTip="Ví dụ: Giấy Couche — hệ thống sẽ ghép thêm định lượng (vd: Giấy Couche 250gsm)."/>
+
+                                <TextBlock Grid.Row="1" Text="Định lượng (gsm):" VerticalAlignment="Center"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding NewPaperGsm, UpdateSourceTrigger=PropertyChanged}" Margin="0,4" Padding="6" VerticalContentAlignment="Center"/>
+
+                                <TextBlock Grid.Row="2" Text="Giá xuất kho (VND/tấn):" VerticalAlignment="Center" Foreground="#1565c0"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding NewPaperExportPrice, Converter={StaticResource VnMoneyConv}, UpdateSourceTrigger=LostFocus}" Margin="0,4" Padding="6" VerticalContentAlignment="Center" FontWeight="Bold" Foreground="#c62828"/>
+                            </Grid>
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,22,0,0">
+                                <Button Content="Hủy" Command="{Binding CancelAddPaperCommand}" Background="#6c757d" Foreground="White" Width="100" Margin="0,0,10,0"/>
+                                <Button Content="💾 Lưu &amp; chọn" Command="{Binding SaveNewPaperCommand}" Background="#28a745" Foreground="White" Width="130" FontWeight="Bold"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </TabItem>
+                </TabControl>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

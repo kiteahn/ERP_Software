@@ -1,0 +1,56 @@
+<Window x:Class="PhanMemInAnERP.Views.LoginView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Đăng Nhập Hệ Thống" Height="500" Width="400" 
+        WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="NoResize"
+        Background="Transparent" AllowsTransparency="True">
+
+    <Border Background="White" CornerRadius="20" BorderBrush="#e0e0e0" BorderThickness="1" Margin="10">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="15" ShadowDepth="5" Opacity="0.2"/>
+        </Border.Effect>
+
+        <StackPanel Margin="30" VerticalAlignment="Center">
+
+            <Image Source="/Views/Untitled-3.png" Height="40" Width="50"/>
+
+            <TextBlock Text="CALCO" FontSize="32" FontWeight="Bold" Foreground="#2c3e50" HorizontalAlignment="Center"/>
+            <TextBlock Text="HỆ THỐNG QUẢN TRỊ IN ẤN" FontSize="14" Foreground="#1abc9c" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,5,0,30"/>
+
+            <TextBlock Text="Tên đăng nhập:" FontWeight="Bold" Foreground="#34495e"/>
+            <TextBox x:Name="LvwUsernameTextBox" FontSize="16" Padding="8" Margin="0,5,0,15" Background="#f8f9fa"
+                     KeyDown="CredentialField_KeyDown"/>
+
+            <TextBlock Text="Mật khẩu:" FontWeight="Bold" Foreground="#34495e"/>
+            <Border Background="#f8f9fa" BorderBrush="#dee2e6" BorderThickness="1" Margin="0,5,0,5" CornerRadius="2">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <PasswordBox x:Name="LvwPasswordBox" Grid.Column="0" FontSize="16" Padding="8,8,4,8"
+                                 BorderThickness="0" Background="Transparent" VerticalContentAlignment="Center"
+                                 KeyDown="CredentialField_KeyDown"/>
+                    <TextBox x:Name="LvwPasswordVisibleTextBox" Grid.Column="0" FontSize="16" Padding="8,8,4,8"
+                             BorderThickness="0" Background="Transparent" VerticalContentAlignment="Center"
+                             Visibility="Collapsed" KeyDown="CredentialField_KeyDown"/>
+                    <Button x:Name="LvwTogglePasswordVisibilityButton" Grid.Column="1" Width="40" MinHeight="36"
+                            Padding="4" Margin="0,2,4,2" Click="TogglePasswordVisibility_Click"
+                            ToolTip="Hiện mật khẩu" Background="Transparent" BorderThickness="0" Cursor="Hand"
+                            Focusable="False">
+                        <materialDesign:PackIcon x:Name="LvwPasswordVisibilityIcon" Kind="Eye" Width="22" Height="22"
+                                                 Foreground="#7f8c8d" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <TextBlock x:Name="LvwErrorTextBlock" Foreground="#dc3545" FontSize="13" TextWrapping="Wrap" TextAlignment="Center" Margin="0,5,0,15" Visibility="Collapsed"/>
+
+            <Button x:Name="LvwSubmitButton" Content="ĐĂNG NHẬP" Click="BtnLogin_Click" IsDefault="True"
+                    Background="#2c3e50" Foreground="White" FontSize="16" FontWeight="Bold" Height="45" Margin="0,10,0,15"/>
+
+            <Button Content="Thoát phần mềm" Click="BtnExit_Click" Background="Transparent" Foreground="#7f8c8d" BorderThickness="0" Cursor="Hand"/>
+        </StackPanel>
+    </Border>
+</Window>
