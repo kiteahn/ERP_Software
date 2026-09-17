@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sơ đồ Luồng Dữ liệu ERP — Ngành In Ấn &amp; Bao Bì</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #0f1419;
+            color: #e7e9ea;
+            min-height: 100vh;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #1a2a3a 0%, #0d2137 100%);
+            padding: 32px 40px 24px;
+            border-bottom: 2px solid #1d9bf0;
+        }
+        .page-header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1d9bf0;
+            margin-bottom: 6px;
+        }
+        .page-header p {
+            font-size: 14px;
+            color: #8899a6;
+        }
+        .legend-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 24px;
+            padding: 14px 40px;
+            background: #151f2e;
+            border-bottom: 1px solid #253341;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #8899a6;
+        }
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+        .legend-dot.doc  { background: #4CAF50; }
+        .legend-dot.proc { background: #FF9800; }
+        .legend-dot.branch { background: #E91E63; }
+        .legend-dot.auto { background: #9C27B0; }
+        .legend-dot.warn { background: #F44336; }
+        .mermaid-section {
+            padding: 24px 20px 40px;
+            overflow-x: auto;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+        .mermaid pre {
+            font-size: 13px !important;
+        }
+        .summary-section {
+            padding: 0 40px 40px;
+        }
+        .summary-section h2 {
+            font-size: 18px;
+            color: #1d9bf0;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #253341;
+            padding-bottom: 8px;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .summary-table th {
+            background: #1a2a3a;
+            color: #1d9bf0;
+            padding: 10px 12px;
+            text-align: left;
+            border: 1px solid #253341;
+            font-weight: 600;
+        }
+        .summary-table td {
+            padding: 8px 12px;
+            border: 1px solid #253341;
+            color: #e7e9ea;
+            vertical-align: top;
+        }
+        .summary-table tr:nth-child(even) td {
+            background: #151f2e;
+        }
+        .summary-table tr:hover td {
+            background: #1c2a3d;
+        }
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .tag-kinhdoanh  { background: #1976D2; color: #fff; }
+        .tag-kho        { background: #388E3C; color: #fff; }
+        .tag-xuong      { background: #F57C00; color: #fff; }
+        .tag-ketoan     { background: #7B1FA2; color: #fff; }
+        .tag-doc        { background: #4CAF50; color: #fff; }
+        .tag-proc       { background: #FF9800; color: #fff; }
+        .tag-system     { background: #9C27B0; color: #fff; }
+        .tag-error      { background: #F44336; color: #fff; }
+        .note { color: #ff9800; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="page-header">
+    <h1>📊 Sơ đồ Luồng Dữ liệu ERP — Ngành In Ấn &amp; Bao Bì</h1>
+    <p>Thể hiện 4 làn (swimlane) theo bộ phận: Kinh doanh → Kho → Xưởng SX → Kế toán &nbsp;|&nbsp; 12 bước từ yêu cầu → thanh toán</p>
+</div>
+
+<div class="legend-bar">
+    <div class="legend-item"><div class="legend-dot doc"></div>Chứng từ / Model lưu DB</div>
+    <div class="legend-item"><div class="legend-dot proc"></div>Bước xử lý</div>
+    <div class="legend-item"><div class="legend-dot branch"></div>Rẽ nhánh / Điều kiện</div>
+    <div class="legend-item"><div class="legend-dot auto"></div>Hệ thống tự động</div>
+    <div class="legend-item"><div class="legend-dot warn"></div>Hao hụt / Xử lý lỗi</div>
+    <div class="legend-item" style="margin-left:auto;color:#ffd700;">● = Model hiện có &nbsp; ○ = Model cần bổ sung</div>
+</div>
+
+<div class="mermaid-section">
+<div class="mermaid">
+flowchart LR
+    subgraph KD["<b>📋 LÀN 1 — KINH DOANH</b>"]
+        direction TB
+        A1(["👤 Khách gửi yêu cầu<br/>(kích thước, số lượng, chất liệu)"])
+        A2(["📝 Tạo Phiếu Yêu Cầu Báo Giá"])
+        A3(["⚙️ Hệ thống tự tính giá<br/>Theo công thức<br/>Giấy + Kẽm + In + Cán + Bế + Dán<br/>+ Dây + Nút + Thùng + Xe<br/>+ Proof + Hao hụt + %LN"])
+        A4(["📄 Xuất PDF gửi khách<br/>(Hoặc nhiều phiên bản v1,v2...)"])
+        A5(["✅ Khách duyệt"])
+        A6(["📦 Tạo Sales Order (SO)"])
+        A7(["🖼️ Gửi file thiết kế cho khách duyệt"])
+        A8(["✅ Biên bản duyệt mẫu<br/>(File OK)"])
+        A9(["📋 Kinh doanh tạo / xem Lệnh SX"])
+    end
+
+    subgraph KHO["<b>📦 LÀN 2 — KHO</b>"]
+        direction TB
+        B1(["📋 Kiểm tra tồn kho NVL"])
+        B2{"⚠️ Đủ NVL?"}
+        B3(["🛒 Tạo Đơn Mua Hàng<br/>→ gửi nhà cung cấp"])
+        B4(["⏳ Chờ nhập kho NVL"])
+        B5(["📤 Xuất kho đúng định mức<br/>cho Lệnh SX"])
+        B6(["📤 Xuất kho theo định mức<br/>Nguyên vật liệu cho từng lệnh<br/>(Giấy, Mực, Kẽm...)"])
+        B7(["📥 Nhập kho Thành phẩm<br/>(Số lượng thực tế — sau QC)"])
+    end
+
+    subgraph SX["<b>🏭 LÀN 3 — XƯỞNG SẢN XUẤT</b>"]
+        direction TB
+        C1(["📋 Nhận Lệnh SX (PO)"])
+        C2(["🔲 In Offset / Flexo"])
+        C3(["🔲 Cán Màng / Ép Kim"])
+        C4(["🔲 Bế / Cắt"])
+        C5(["🔲 Dán Hộp / Đóng Gói"])
+        C6(["📋 Ghi nhận thời gian<br/>máy móc, nhân công<br/>→ Phiếu theo dõi công đoạn"])
+        C7(["🔍 QC kiểm tra<br/>từng công đoạn"])
+        C8{"⚠️ Đạt?"}
+        C9(["♻️ Tái chế / Hủy<br/>→ Ghi nhận hao hụt<br/>→ Lưu phiếu hao hụt"])
+        C10(["✅ Hoàn thành — bàn giao QC"])
+        C11(["📋 Hoàn tất Lệnh SX<br/>Chuyển thành phẩm về Kho"])
+    end
+
+    subgraph KT["<b>💰 LÀN 4 — KẾ TOÁN</b>"]
+        direction TB
+        D1(["📋 Nhận hóa đơn &amp; đơn hàng"])
+        D2(["📋 Hạch toán chi phí sản xuất<br/>Nợ 154 / Có 152<br/>(NVL xuất kho)"])
+        D3(["📋 Hạch toán thành phẩm<br/>Nợ 155 / Có 154"])
+        D4(["📋 Xuất Hóa đơn GTGT<br/>Tự động hạch toán<br/>Nợ 131 / Có 511 / Có 3331"])
+        D5(["🔔 Nhắc nợ tự động<br/>theo ngày đến hạn"])
+        D6(["💵 Thu tiền khách<br/>Nợ 111/112 / Có 131"])
+        D7(["📋 Cuối kỳ<br/>Kết chuyển<br/>Nợ 511 / Có 911"])
+    end
+
+    %% ===================== LUỒNG CHÍNH =====================
+    A1 --> A2
+    A2 --> A3
+    A3 --> A4
+    A4 --> A5
+
+    A5 -. "Khách không duyệt → chỉnh lại giá báo giá" .-> A3
+
+    A5 --> A6
+    A6 --> A7
+    A7 --> A8
+
+    A8 -. "Không đạt → khách chỉnh sửa → duyệt lại" .-> A7
+
+    A6 -. "SO kích hoạt tự động" .-> C1
+    A6 --> A9
+
+    A9 --> C1
+
+    %% ===================== KHO =====================
+    C1 --> B1
+    B1 --> B2
+    B2 -->|"✅ Đủ"| B5
+    B2 -->|"❌ Thiếu"| B3
+    B3 --> B4
+    B4 --> B5
+    B5 --> B6
+
+    %% ===================== SẢN XUẤT =====================
+    C1 --> C2
+    C2 --> C3
+    C3 --> C4
+    C4 --> C5
+    C5 --> C6
+    C6 --> C7
+    C7 --> C8
+    C8 -->|"✅ Đạt"| C10
+    C8 -->|"❌ Không đạt"| C9
+    C9 -. "Tái chế: quay lại bước liên quan" .-> C2
+    C9 -. "Hủy: ghi hao hụt" .-> C10
+    C10 --> C11
+    C11 --> B7
+
+    %% ===================== KẾ TOÁN =====================
+    B6 -. "Tự động ghi nhận" .-> D2
+    B7 -. "Tự động ghi nhận" .-> D3
+    C11 -. "Tự động thông báo" .-> D1
+    A6 -. "Tự động thông báo" .-> D1
+    D3 --> D4
+    D4 --> D5
+    D5 --> D6
+    D6 --> D7
+
+    style A2 fill:#1976D2,stroke:#0d47a1,color:#fff
+    style A3 fill:#1565c0,stroke:#0d47a1,color:#fff
+    style A4 fill:#1976D2,stroke:#0d47a1,color:#fff
+    style A6 fill:#1565c0,stroke:#0d47a1,color:#fff
+    style A9 fill:#1565c0,stroke:#0d47a1,color:#fff
+    style A7 fill:#1565c0,stroke:#0d47a1,color:#fff
+
+    style B1 fill:#2E7D32,stroke:#1b5e20,color:#fff
+    style B3 fill:#2E7D32,stroke:#1b5e20,color:#fff
+    style B4 fill:#388E3C,stroke:#1b5e20,color:#fff
+    style B5 fill:#2E7D32,stroke:#1b5e20,color:#fff
+    style B6 fill:#2E7D32,stroke:#1b5e20,color:#fff
+    style B7 fill:#2E7D32,stroke:#1b5e20,color:#fff
+
+    style C1 fill:#E65100,stroke:#bf360c,color:#fff
+    style C2 fill:#EF6C00,stroke:#bf360c,color:#fff
+    style C3 fill:#EF6C00,stroke:#bf360c,color:#fff
+    style C4 fill:#EF6C00,stroke:#bf360c,color:#fff
+    style C5 fill:#EF6C00,stroke:#bf360c,color:#fff
+    style C6 fill:#F57C00,stroke:#bf360c,color:#fff
+    style C7 fill:#EF6C00,stroke:#bf360c,color:#fff
+    style C9 fill:#C62828,stroke:#b71c1c,color:#fff
+    style C10 fill:#F57C00,stroke:#bf360c,color:#fff
+    style C11 fill:#E65100,stroke:#bf360c,color:#fff
+
+    style D1 fill:#6A1B9A,stroke:#4a148c,color:#fff
+    style D2 fill:#7B1FA2,stroke:#4a148c,color:#fff
+    style D3 fill:#7B1FA2,stroke:#4a148c,color:#fff
+    style D4 fill:#6A1B9A,stroke:#4a148c,color:#fff
+    style D5 fill:#7B1FA2,stroke:#4a148c,color:#fff
+    style D6 fill:#6A1B9A,stroke:#4a148c,color:#fff
+    style D7 fill:#7B1FA2,stroke:#4a148c,color:#fff
+
+    style B2 fill:#FF9800,stroke:#e65100,color:#000
+    style C8 fill:#FF9800,stroke:#e65100,color:#000
+</div>
+</div>
+
+<div class="summary-section">
+    <h2>📋 Bảng tổng hợp — Chứng từ / Model &amp; Làn phụ trách</h2>
+    <table class="summary-table">
+        <thead>
+            <tr>
+                <th style="width:40px">Bước</th>
+                <th style="width:120px">Tên bước</th>
+                <th style="width:110px">Làn phụ trách</th>
+                <th>Chứng từ sinh ra</th>
+                <th>Model / Entity hiện có</th>
+                <th>Trạng thái</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Tiếp nhận yêu cầu</td>
+                <td><span class="tag tag-kinhdoanh">Kinh doanh</span></td>
+                <td>Phiếu yêu cầu báo giá</td>
+                <td><code style="color:#1d9bf0">Quotation</code> (bước 1–2)</td>
+                <td><span class="tag tag-doc">● Có</span></td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Báo giá</td>
+                <td><span class="tag tag-kinhdoanh">Kinh doanh</span></td>
+                <td>Báo giá v1, v2...; PDF xuất cho khách</td>
+                <td><code style="color:#1d9bf0">Quotation</code></td>
+                <td><span class="tag tag-doc">● Có</span></td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Xác nhận đơn hàng</td>
+                <td><span class="tag tag-kinhdoanh">Kinh doanh</span></td>
+                <td>Sales Order (SO) — kèm file thiết kế</td>
+                <td><code style="color:#1d9bf0">SalesOrder</code></td>
+                <td><span class="tag tag-doc">● Có</span></td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Duyệt file thiết kế</td>
+                <td><span class="tag tag-kinhdoanh">Kinh doanh</span></td>
+                <td>Biên bản duyệt mẫu</td>
+                <td><em>Chưa tách bảng riêng — lưu trong SalesOrder.Notes</em></td>
+                <td><span class="tag tag-error">○ Cần thêm</span></td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>Lệnh sản xuất</td>
+                <td><span class="tag tag-kinhdoanh">Kinh doanh</span><br/><span class="tag tag-xuong">Xưởng SX</span></td>
+                <td>Lệnh sản xuất (Production Order — PO)</td>
+                <td><code style="color:#1d9bf0">ProductionOrder</code></td>
+                <td><span class="tag tag-doc">● Có</span></td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>Xuất kho NVL</td>
+                <td><span class="tag tag-kho">Kho</span></td>
+                <td>Phiếu xuất kho (ExportTransaction)</td>
+                <td><code style="color:#1d9bf0">ExportTransaction</code> + <code style="color:#1d9bf0">Material</code></td>
+                <td><span class="tag tag-doc">● Có</span></td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td>Sản xuất theo công đoạn</td>
+                <td><span class="tag tag-xuong">Xưởng SX</span></td>
+                <td>Phiếu theo dõi công đoạn<br/><em>(ghi nhận thời gian, máy, nhân công)</em></td>
+                <td><em>Chưa tách bảng riêng — ghi trong ProductionOrder.Notes</em></td>
+                <td><span class="tag tag-error">○ Cần thêm</span></td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td>Kiểm tra chất lượng (QC)</td>
+                <td><span class="tag tag-xuong">Xưởng SX</span></td>
+                <td>Phiếu QC (lem mực, lệch màu, kích thước sai)</td>
+                <td><em>Không có bảng QC — ghi trong ProductionOrder.Notes</em></td>
+                <td><span class="tag tag-error">○ Cần thêm</span></td>
+            </tr>
+            <tr>
+                <td>9</td>
+                <td>Nhập kho thành phẩm</td>
+                <td><span class="tag tag-kho">Kho</span></td>
+                <td>Phiếu nhập kho thành phẩm</td>
+                <td><code style="color:#1d9bf0">ImportTransaction</code> (loại = "Thành phẩm")</td>
+                <td><span class="tag tag-doc">● Có</span></td>
+            </tr>
+            <tr>
+                <td>10</td>
+                <td>Giao hàng</td>
+                <td><span class="tag tag-kinhdoanh">Kinh doanh</span><br/><span class="tag tag-kho">Kho</span></td>
+                <td>Phiếu giao hàng / Biên bản giao nhận</td>
+                <td><em>Chưa tách bảng riêng — ghi trong SalesOrder.Status</em></td>
+                <td><span class="tag tag-error">○ Cần thêm</span></td>
+            </tr>
+            <tr>
+                <td>11</td>
+                <td>Xuất hóa đơn &amp; doanh thu</td>
+                <td><span class="tag tag-ketoan">Kế toán</span></td>
+                <td>Hóa đơn GTGT<br/><em>Nợ 131 / Có 511 / Có 3331</em></td>
+                <td><code style="color:#1d9bf0">Invoice</code></td>
+                <td><span class="tag tag-doc">● Có</span></td>
+            </tr>
+            <tr>
+                <td>12</td>
+                <td>Theo dõi công nợ &amp; thu tiền</td>
+                <td><span class="tag tag-ketoan">Kế toán</span></td>
+                <td>Phiếu thu<br/><em>Nợ 111/112 / Có 131</em></td>
+                <td><code style="color:#1d9bf0">Payment</code></td>
+                <td><span class="tag tag-doc">● Có</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <br/>
+    <h2>📌 Mô tả chi tiết luồng — giao diện hệ thống</h2>
+    <table class="summary-table">
+        <thead>
+            <tr>
+                <th>Bước</th>
+                <th>Giao diện (View)</th>
+                <th>Logic chính</th>
+                <th>Ghi chú</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1–2</td>
+                <td><code>QuotationView.xaml</code></td>
+                <td>QuotationViewModel — tính giá tự động, lưu nhiều phiên bản, xuất PDF/Excel</td>
+                <td>Báo giá v1, v2... lưu trong bảng <code>Quotations</code> — cột <code>QuoteNo</code></td>
+            </tr>
+            <tr>
+                <td>3–4</td>
+                <td><code>SalesView.xaml</code></td>
+                <td>SalesViewModel — tạo SO từ Quotation, gắn file thiết kế, duyệt mẫu</td>
+                <td>SalesOrder gắn QuotationId, lưu file trong <code>SalesOrder.Notes</code> hoặc bảng riêng</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td><code>ProductionOrderView.xaml</code></td>
+                <td>ProductionOrderViewModel — tạo PO từ SO, chỉ định máy, ca, deadline</td>
+                <td>Bảng <code>ProductionOrders</code> gắn <code>SalesOrderId</code>; ghi nhận công đoạn qua các cột bool</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td><code>WarehouseView.xaml</code></td>
+                <td>WarehouseViewModel — kiểm tra tồn, xuất kho cho PO, ghi <code>ExportTransaction</code></td>
+                <td>Xuất: Nợ 154 / Có 152 (ghi nhận chi phí NVL — chưa implement)</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td><code>ProductionOrderView.xaml</code></td>
+                <td>Theo dõi công đoạn: In → Cán → Bế → Dán → Đóng thùng</td>
+                <td>Cần bảng <code>ProductionStageLog</code> ghi thời gian, máy, nhân công</td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td><code>ProductionOrderView.xaml</code></td>
+                <td>QC kiểm tra — ghi nhận lem mực, lệch màu, kích thước</td>
+                <td>Cần bảng <code>QualityCheck</code> gắn <code>ProductionOrderId</code></td>
+            </tr>
+            <tr>
+                <td>9</td>
+                <td><code>WarehouseView.xaml</code></td>
+                <td>Nhập kho thành phẩm — ghi <code>ImportTransaction</code> (loại = "Thành phẩm")</td>
+                <td>Nhập: Nợ 155 / Có 154 (ghi nhận thành phẩm — chưa implement)</td>
+            </tr>
+            <tr>
+                <td>10</td>
+                <td><code>SalesView.xaml</code></td>
+                <td>Tạo phiếu giao hàng, xác nhận giao thành công → cập nhật <code>SalesOrder.Status</code></td>
+                <td>Cần bảng <code>DeliveryHandover</code></td>
+            </tr>
+            <tr>
+                <td>11</td>
+                <td><code>SalesView.xaml</code> (tab Hóa đơn)</td>
+                <td>Tạo Invoice từ SO đã giao — tự động hạch toán <code>Nợ 131 / Có 511 / Có 3331</code></td>
+                <td>Model <code>Invoice</code> — cần thêm cột VATRate, hạch toán chi tiết</td>
+            </tr>
+            <tr>
+                <td>12</td>
+                <td><code>SalesView.xaml</code> (tab Công nợ)</td>
+                <td>Nhắc nợ tự động; ghi Payment — <code>Nợ 111/112 / Có 131</code>; kết chuyển <code>Nợ 511 / Có 911</code></td>
+                <td>Model <code>Payment</code> — nhắc nợ theo <code>Invoice.DueDate</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <br/>
+    <h2>🔧 Danh sách Model cần bổ sung</h2>
+    <table class="summary-table">
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th>Tên Model mới</th>
+                <th>Các cột cần có</th>
+                <th>Phục vụ bước</th>
+                <th>Ghi chú</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td><code>DesignApproval</code></td>
+                <td>Id, SalesOrderId, FilePath, ApprovedAt, ApprovedBy, Notes, Status</td>
+                <td>4 — Duyệt file thiết kế</td>
+                <td>Thay thế ghi trong <code>SalesOrder.Notes</code></td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td><code>ProductionStageLog</code></td>
+                <td>Id, ProductionOrderId, StageName, MachineName, StartTime, EndTime, WorkerCount, QuantityOutput, DefectQty, Notes</td>
+                <td>7 — Theo dõi công đoạn</td>
+                <td>Ghi nhận thời gian, máy, nhân công mỗi công đoạn</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td><code>QualityCheck</code></td>
+                <td>Id, ProductionOrderId, ProductionStageLogId, CheckedAt, CheckedBy, DefectType, DefectQty, Action (Tái chế/Hủy/OK), Notes</td>
+                <td>8 — QC</td>
+                <td>Ghi lem mực, lệch màu, kích thước sai</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td><code>DeliveryHandover</code></td>
+                <td>Id, SalesOrderId, DeliveryDate, DeliveryAddress, ReceiverName, ReceiverPhone, SignaturePath, Notes, Status</td>
+                <td>10 — Giao hàng</td>
+                <td>Thay thế ghi trong <code>SalesOrder.Status</code></td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td><code>PurchaseOrder</code></td>
+                <td>Id, TicketNo, Supplier, MaterialId, Quantity, UnitPrice, TotalPrice, Status, ExpectedDeliveryDate, UserId</td>
+                <td>6 — Mua hàng khi thiếu NVL</td>
+                <td>Dùng khi kho thiếu NVL → tạo đơn mua</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td><code>AccountingEntry</code></td>
+                <td>Id, RefId, RefType (Invoice/Payment/Export), AccountCode, DebitAmount, CreditAmount, EntryDate, Notes</td>
+                <td>6, 9, 11, 12 — Hạch toán</td>
+                <td>Hạch toán định khoản: Nợ 154/Có 152, Nợ 155/Có 154, Nợ 131/Có 511/Có 3331, Nợ 111/Có 131</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        flowchart: {
+            useMaxWidth: true,
+            htmlLabels: true,
+            curve: 'basis',
+            rankSpacing: 40,
+            nodeSpacing: 30,
+            padding: 12
+        },
+        themeVariables: {
+            background: '#0f1419',
+            mainBkg: '#1a2a3a',
+            nodeBorder: '#253341',
+            clusterBkg: '#151f2e',
+            clusterBorder: '#1d9bf0',
+            titleColor: '#1d9bf0',
+            edgeLabelBackground: '#0f1419',
+            nodeTextColor: '#e7e9ea',
+            fontFamily: "'Segoe UI', Arial, sans-serif",
+            fontSize: '13px'
+        }
+    });
+</script>
+</body>
+</html>

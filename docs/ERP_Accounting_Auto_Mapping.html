@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>PHẦN 3 — Kế toán tự động (ánh xạ nghiệp vụ) — ERP In ấn</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 24px; background: #f8fafc; color: #1e293b; line-height: 1.5; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #9333ea; padding-bottom: 8px; }
+    h2 { font-size: 1.15rem; margin-top: 28px; color: #5b21b6; }
+    p.note { background: #f3e8ff; border-left: 4px solid #9333ea; padding: 12px 16px; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 24px; font-size: 0.9rem; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    th, td { border: 1px solid #e2e8f0; padding: 10px 12px; vertical-align: top; }
+    th { background: #ede9fe; text-align: left; }
+    tr:nth-child(even) { background: #faf5ff; }
+    code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
+    ul { margin: 8px 0 8px 20px; }
+  </style>
+</head>
+<body>
+
+<h1>PHẦN 3 — Kế toán tự động gắn nghiệp vụ (ERP ngành in ấn)</h1>
+<p>Tài liệu mô tả <strong>bảng ánh xạ</strong> từ hành động phần mềm sang <strong>bút toán tự động</strong>, đồng bộ với <strong>PHẦN 2 — Giá thành</strong> (621 NVL, 622 nhân công, 627 SC tập hợp vào <strong>154</strong> trước khi <strong>Nợ 155 / Có 154</strong>).</p>
+
+<p class="note"><strong>Yêu cầu 3.3 — Màn hình xem trước:</strong> Trước khi xác nhận nghiệp vụ, hệ thống hiển thị các dòng Nợ/Có để kế toán kiểm tra; chỉ sau khi bấm <em>Xác nhận ghi sổ</em> mới lưu lô bút toán vào CSDL. Trong ứng dụng: menu <strong>KẾ TOÁN TỰ ĐỘNG</strong> → thử nghiệp vụ → <strong>Xem trước bút toán</strong>.</p>
+
+<h2>3.1 Cấu trúc bảng ánh xạ (cột chuẩn)</h2>
+<ul>
+  <li><strong>Hành động trong phần mềm</strong></li>
+  <li><strong>Bộ phận thực hiện</strong></li>
+  <li><strong>Chứng từ sinh ra</strong></li>
+  <li><strong>Bút toán tự động</strong></li>
+  <li><strong>Điều kiện kích hoạt</strong></li>
+</ul>
+
+<h2>3.2.1 Nhóm mua hàng &amp; nhập kho</h2>
+<table>
+  <thead><tr><th>Hành động</th><th>Bộ phận</th><th>Chứng từ</th><th>Bút toán</th><th>Điều kiện</th></tr></thead>
+  <tbody>
+    <tr><td>Duyệt đơn mua hàng</td><td>Mua hàng / Kế toán</td><td>Trạng thái PO đã duyệt</td><td><em>Chưa hạch toán</em></td><td>Chưa ghi nhận hàng về / chưa có công nợ theo hàng</td></tr>
+    <tr><td>Nhận hàng nhập kho</td><td>Kho / Mua hàng</td><td>Phiếu nhập kho; HĐ NCC (nếu có)</td><td>Nợ <code>152</code> / Có <code>331</code></td><td>Kiểm đếm xong; có giá trị NVL và công nợ NCC</td></tr>
+    <tr><td>Thanh toán NCC (tiền mặt)</td><td>Kế toán</td><td>Phiếu chi</td><td>Nợ <code>331</code> / Có <code>111</code></td><td>Chi tiền mặt</td></tr>
+    <tr><td>Thanh toán NCC (CK)</td><td>Kế toán</td><td>UNC, sao kê NH</td><td>Nợ <code>331</code> / Có <code>112</code></td><td>Chuyển khoản</td></tr>
+  </tbody>
+</table>
+
+<h2>3.2.2 Nhóm sản xuất</h2>
+<table>
+  <thead><tr><th>Hành động</th><th>Bộ phận</th><th>Chứng từ</th><th>Bút toán</th><th>Điều kiện</th></tr></thead>
+  <tbody>
+    <tr><td>Xuất kho NVL cho lệnh SX</td><td>Kho / SX</td><td>Phiếu xuất NVL theo WO</td><td>Nợ <code>154</code> / Có <code>152</code></td><td>Gắn lệnh SX; chi phí NVL trực tiếp (621) tập hợp vào 154</td></tr>
+    <tr><td>Ghi nhận nhân công trực tiếp</td><td>SX / NS</td><td>Bảng giờ máy / lệnh</td><td>Nợ <code>154</code> / Có <code>334</code></td><td>Khóa công kỳ; 622 → 154</td></tr>
+    <tr><td>Phân bổ chi phí máy</td><td>SX / Kế toán</td><td>Bảng phân bổ giờ máy</td><td>Nợ <code>154</code> / Có <code>214</code> (KH); Nợ <code>154</code> / Có <code>331</code> (điện, CP chung)</td><td>Theo PHẦN 2: KH máy, điện, QL phân xưởng (627 → 154)</td></tr>
+    <tr><td>Nhập kho thành phẩm</td><td>Kho / SX</td><td>Phiếu nhập TP, đóng lệnh</td><td>Nợ <code>155</code> / Có <code>154</code></td><td>Hoàn thành SX; xác định giá thành lệnh</td></tr>
+  </tbody>
+</table>
+
+<h2>3.2.3 Nhóm bán hàng</h2>
+<table>
+  <thead><tr><th>Hành động</th><th>Bộ phận</th><th>Chứng từ</th><th>Bút toán</th><th>Điều kiện</th></tr></thead>
+  <tbody>
+    <tr><td>Giao hàng + xuất HĐ</td><td>Bán hàng / KT</td><td>HĐ GTGT, BB giao hàng</td><td>Nợ <code>131</code> / Có <code>511</code> / Có <code>3331</code></td><td>Đủ điều kiện ghi nhận DT &amp; thuế đầu ra</td></tr>
+    <tr><td>Ghi nhận giá vốn</td><td>KT / Kho</td><td>Phiếu xuất bán</td><td>Nợ <code>632</code> / Có <code>155</code></td><td>Đồng thời hoặc ngay sau DT; có GV TP</td></tr>
+    <tr><td>Khách trả tiền mặt</td><td>KT / Thu ngân</td><td>Phiếu thu</td><td>Nợ <code>111</code> / Có <code>131</code></td><td>Đã thu, bù trừ công nợ</td></tr>
+    <tr><td>Khách chuyển khoản</td><td>Kế toán</td><td>Sao kê NH</td><td>Nợ <code>112</code> / Có <code>131</code></td><td>Tiền về TK công ty</td></tr>
+  </tbody>
+</table>
+
+<h2>3.2.4 Nhóm đặc thù ngành in</h2>
+<table>
+  <thead><tr><th>Hành động</th><th>Bộ phận</th><th>Chứng từ</th><th>Bút toán</th><th>Điều kiện</th></tr></thead>
+  <tbody>
+    <tr><td>Hàng hỏng QC (bồi thường)</td><td>QC / KT</td><td>BB hỏng, QĐ xử lý</td><td>Nợ <code>138</code> / Có <code>154</code></td><td>Có đối tượng thu bồi thường</td></tr>
+    <tr><td>Hàng hỏng QC (chi phí)</td><td>QC / KT</td><td>BB hủy / nội bộ</td><td>Nợ <code>632</code> / Có <code>154</code></td><td>Không thu hồi; ghi nhận chi phí</td></tr>
+    <tr><td>Hao hụt vượt định mức</td><td>SX / KT</td><td>Đối chiếu định mức vs thực tế</td><td>Nợ <code>632</code> / Có <code>154</code></td><td>Chênh lệch vượt định mức được duyệt (PHẦN 2.3–2.4)</td></tr>
+    <tr><td>Khách trả hàng (DT)</td><td>Bán hàng / KT</td><td>HĐ điều chỉnh giảm</td><td>Nợ <code>511</code>, Nợ <code>3331</code> / Có <code>131</code></td><td>Giảm DT &amp; thuế GTGT đầu ra</td></tr>
+    <tr><td>Khách trả hàng (kho)</td><td>Kho / KT</td><td>Phiếu nhập hàng trả</td><td>Nợ <code>155</code> / Có <code>632</code></td><td>Nhập lại TP đạt chất lượng</td></tr>
+    <tr><td>Chiết khấu thanh toán sớm</td><td>Kế toán</td><td>Phụ lục / thỏa thuận</td><td>Nợ <code>635</code> / Có <code>131</code></td><td>CK thanh toán trước hạn</td></tr>
+    <tr><td>Chiết khấu thương mại (sản lượng)</td><td>Bán hàng / KT</td><td>Phụ lục sau kỳ</td><td>Nợ <code>511</code> / Có <code>131</code></td><td>Đạt mốc sản lượng / DT</td></tr>
+  </tbody>
+</table>
+
+<h2>3.2.5 Nhóm cuối kỳ</h2>
+<table>
+  <thead><tr><th>Hành động</th><th>Bộ phận</th><th>Chứng từ</th><th>Bút toán</th><th>Điều kiện</th></tr></thead>
+  <tbody>
+    <tr><td>Kết chuyển doanh thu</td><td>Kế toán</td><td>Bút cuối kỳ</td><td>Nợ <code>511</code> / Có <code>911</code></td><td>Khóa sổ kỳ</td></tr>
+    <tr><td>Kết chuyển giá vốn</td><td>Kế toán</td><td>Bút cuối kỳ</td><td>Nợ <code>911</code> / Có <code>632</code></td><td>Khóa sổ kỳ</td></tr>
+    <tr><td>Kết chuyển CP bán hàng</td><td>Kế toán</td><td>Bút cuối kỳ</td><td>Nợ <code>911</code> / Có <code>641</code></td><td>Khóa sổ kỳ</td></tr>
+    <tr><td>Kết chuyển CP QLDN</td><td>Kế toán</td><td>Bút cuối kỳ</td><td>Nợ <code>911</code> / Có <code>642</code></td><td>Khóa sổ kỳ</td></tr>
+    <tr><td>Xác định lãi</td><td>Kế toán</td><td>Kết quả KD</td><td>Nợ <code>911</code> / Có <code>421</code></td><td>911 có bên Có sau kết chuyển</td></tr>
+    <tr><td>Xác định lỗ</td><td>Kế toán</td><td>Kết quả KD</td><td>Nợ <code>421</code> / Có <code>911</code></td><td>911 có bên Nợ (lỗ)</td></tr>
+  </tbody>
+</table>
+
+<h2>Liên kết mã trong phần mềm</h2>
+<p>Các nghiệp vụ trên được mã hóa trong <code>Helpers/AccountingJournalMapper.cs</code> (<code>AccountingTrigger</code>). Sau khi nâng cấp, có thể gọi mapper từ <strong>Nhập kho</strong>, <strong>Xuất kho SX</strong>, <strong>Hóa đơn</strong>, <strong>Thanh toán</strong>… để mở <strong>JournalPreviewWindow</strong> trước khi lưu chứng từ nghiệp vụ.</p>
+
+<p style="margin-top:32px;font-size:0.85rem;color:#64748b;">VIỆT TIẾN ERP — tài liệu nội bộ. Cập nhật theo PHẦN 2–3 spec.</p>
+</body>
+</html>
